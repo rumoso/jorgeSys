@@ -1,0 +1,7 @@
+{
+  "name": "truckManager",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
