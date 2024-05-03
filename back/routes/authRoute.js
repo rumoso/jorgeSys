@@ -5,7 +5,10 @@ const { validarCampos } = require('../middlewares/validar-campos')
 const { esRolValido, existeEmail } = require('../helpers/db-validators/user-validator');
 
 const { 
+
     login
+    , getMenuByPermissions
+    
 } = require('../controllers/authController');
 
 
@@ -16,5 +19,11 @@ router.post('/login', [
     check('pwd','Contraseña obligatoria').not().isEmpty(),
     validarCampos
 ], login);
+
+router.post('/getMenuByPermissions',[
+    check('idUser','Usuario obligatorio').not().isEmpty(),
+    validarCampos
+
+], getMenuByPermissions );
 
 module.exports = router;

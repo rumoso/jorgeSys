@@ -36,7 +36,7 @@
   
       <ion-row>
         <ion-col class="text-aling-center">
-          <ion-button 
+          <ion-button (click)="loginON()"
                       color="primary"
                       shape="round"
                       [disabled]="!( login.username.length > 0 && login.pwd.length > 0 )">

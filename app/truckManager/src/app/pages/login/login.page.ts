@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController } from '@ionic/angular';
+import { ResponseGet } from 'src/app/interfaces/global.interface';
 import { AuthService } from 'src/app/services/auth.service';
 import { SQLiteService } from 'src/app/services/sqlite.service';
 import { UiService } from 'src/app/services/ui.service';
@@ -36,7 +37,7 @@ export class LoginPage implements OnInit {
 
         if(resp.status == 0){
           await this.authServ.saveToken( resp.data.token );
-          await this.sqliteServ.set('user', resp.data.user);
+          await this.SQLiteServ.set('user', resp.data.user);
           
           this.navCtrl.navigateRoot( '/start', { animated: true } );
           this.uiServ.showToast('Usuario correcto');
