@@ -8,7 +8,7 @@ const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then( m => m.AuthModule )
   },
   {
-    path: 'VioletaSistem',
+    path: 'TruckManager',
     loadChildren: () => import('./protected/protected.module').then( m => m.ProtectedModule ),
     //canLoad: [ AuthGuard ],
     //canActivate: [ AuthGuard ]

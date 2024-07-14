@@ -11,7 +11,6 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 export class CustomersService {
 
   private baseURL: string = environment.baseUrl;
-  private idSucursal: number = environment.idSucursal;
 
   _api: string = 'api/customers';
   
@@ -40,11 +39,13 @@ export class CustomersService {
 
   }
 
-  CCbxGetCustomersCombo( search: string, idUser: number ): Observable<ResponseGet> {
-    var data = {
-      idUser: idUser,
+  CCbxGetCustomersCombo( search: string ): Observable<ResponseGet> {
+    var data: any = {
       search: search
     }
+
+    data.idUserLogON = this.authServ.getIdUserSession();
+
     return this.http.post<ResponseGet>( `${ this.baseURL }/${ this._api }/cbxGetCustomersCombo`, data);
   }
 
@@ -79,7 +80,6 @@ export class CustomersService {
   CInsertCustomer( data : any ): Observable<ResponseDB_CRUD> {
     
     data.idUserLogON = this.authServ.getIdUserSession();
-    data.idSucursalLogON = this.idSucursal;
 
     return this.http.post<ResponseDB_CRUD>( `${ this.baseURL }/${ this._api }/insertCustomer`, data );
   }

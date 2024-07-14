@@ -2,8 +2,12 @@ import { Component, Inject } from '@angular/core';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { ResponseGet } from 'src/app/interfaces/general.interfaces';
+import { ResponseDB_CRUD } from 'src/app/protected/interfaces/global.interfaces';
+import { CustomersService } from 'src/app/protected/services/customers.service';
+import { FletesService } from 'src/app/protected/services/fletes.service';
 import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 
@@ -37,6 +41,25 @@ export class FletesComponent {
     active: true
   };
 
+  cargaForm: any = {
+    idFlete: 0,
+    idCargaReparto: 0,
+    idMovimientoType: 0,
+    movTypeDesc: '',
+    idDireccionCliente: 0,
+    direccionDesc: '',
+    fechaCita: '',
+    horaCita: '',
+    idConductor: 0,
+    choferName: '',
+    idUnidad: 0,
+    nombreUnidad: '',
+    apoyo: '',
+    tChep: '',
+    tBlanca: '',
+    tAgranel: ''
+  };
+
   // #endregion
   
 
@@ -50,6 +73,9 @@ export class FletesComponent {
     , @Inject(MAT_DATE_LOCALE) private _locale: string
 
     , private authServ: AuthService
+
+    , private customerServ: CustomersService
+    , private fletesServ: FletesService
     ) { }
 
     
@@ -67,48 +93,40 @@ export class FletesComponent {
   
       this.bShowSpinner = true;
   
-      // this.activatedRoute.params
-      //   .pipe(
-      //     switchMap( ({ id }) => this.productsServ.CGetProductByID( id ) )
-      //   )
-      //   .subscribe( ( resp: any ) => {
-      //     console.log(resp)
-      //      if(resp.status == 0){
+      this.activatedRoute.params
+        .pipe(
+          switchMap( ({ id }) => this.fletesServ.CGetFleteByID( id ) )
+        )
+        .subscribe( ( resp: any ) => {
+          console.log(resp)
+           if(resp.status == 0){
               
-      //       this.idProduct = resp.data.idProduct;
+              this.idFlete = resp.data.idFlete;
+
+              this.fleteForm.idFlete = resp.data.idFlete;
+              this.fleteForm.titulo = resp.data.titulo;
+              this.fleteForm.idCliente = resp.data.idCliente;
+              this.fleteForm.clientName = resp.data.clientName;
+              this.fleteForm.guia = resp.data.guia;
+              this.fleteForm.cartaPorte = resp.data.cartaPorte;
+              this.fleteForm.bFacturado = resp.data.bFacturado;
+              this.fleteForm.active = resp.data.active;
   
-      //       this.productForm = {
-      //         idProduct: resp.data.idProduct,
-      //         idSucursal: resp.data.idSucursal,
-      //         sucursalDesc: resp.data.sucursalDesc,
-      //         createDate: resp.data.createDate,
-      //         barCode: resp.data.barCode,
-      //         name: resp.data.name,
-      //         gramos: resp.data.gramos,
-      //         cost: resp.data.cost,
-      //         price: resp.data.price,
-      //         idFamily: resp.data.idFamily,
-      //         familyDesc: resp.data.familyDesc,
-      //         idGroup: resp.data.idGroup,
-      //         groupDesc: resp.data.groupDesc,
-      //         idQuality: resp.data.idQuality,
-      //         qualityDesc: resp.data.qualityDesc,
-      //         idOrigin: resp.data.idOrigin,
-      //         originDesc: resp.data.originDesc,
-      //         idSupplier: resp.data.idSupplier,
-      //         supplierDesc: resp.data.supplierDesc,
-      //         active: resp.data.active,
-      //         addInv: 1,
-      //         idUser: this.idUserLogON
-      //        };
-  
-  
-      //        this.fn_getInventarylogByIdProductWithPage();
-      //      }else{
-      //       this.servicesGServ.showSnakbar(resp.message);
-      //      }
-      //      this.bShowSpinner = false;
-      //   } )
+           }else{
+
+              this.idFlete = 0;
+
+              this.fleteForm.idFlete = 0;
+              this.fleteForm.titulo = '';
+              this.fleteForm.idCliente = 0;
+              this.fleteForm.clientName = '';
+              this.fleteForm.guia = '';
+              this.fleteForm.cartaPorte = '';
+              this.fleteForm.bFacturado = false;
+              this.fleteForm.active = true;
+            }
+           this.bShowSpinner = false;
+        } )
     }
 
     // #region MÉTODOS DEL FRONT
@@ -134,28 +152,68 @@ export class FletesComponent {
 
     // #endregion
 
+    // #region CONEXIONES CON EL BACK
+    fn_saveFlete() {
+
+      this.servicesGServ.showDialog('¿Estás seguro?'
+        , 'Está a punto de ' + ( this.idFlete > 0 ? 'actualizar el' : 'generar un nuevo' ) + ' Flete'
+        , '¿Desea continuar?'
+        , 'Si', 'No')
+      .afterClosed().subscribe({
+        next: ( resp: any ) =>{
+          if(resp){
+
+            this.bShowSpinner = true;
+  
+            this.fletesServ.CSaveFlete( this.fleteForm )
+              .subscribe({
+                next: (resp: ResponseDB_CRUD) => {
+        
+                  if( resp.status === 0 ){
+                    this.idFlete = resp.insertID;
+                  }
+      
+                  this.servicesGServ.showAlertIA( resp );
+                  
+                  this.bShowSpinner = false;
+        
+                },
+                error: (ex) => {
+        
+                  this.servicesGServ.showSnakbar( "Problemas con el servicio" );
+                  this.bShowSpinner = false;
+        
+                }
+              })
+          
+          }
+        }
+      });
+    }
+    // #endregion
+
     //--------------------------------------------------------------------------
   // MÉTODOS PARA COMBO DE ÁREAS
 
-  cbxClientes: any[] = [];
+  cbxCustomers: any[] = [];
 
   cbxClientes_Search() {
 
-      // this.sucursalesServ.CCbxGetSucursalesCombo( this.fleteForm.clientDesc )
-      //  .subscribe( {
-      //    next: (resp: ResponseGet) =>{
-      //      if(resp.status === 0){
-      //        this.cbxSucursales = resp.data
-      //      }
-      //      else{
-      //       this.cbxSucursales = [];
-      //      }
-      //    },
-      //    error: (ex) => {
-      //      this.servicesGServ.showSnakbar( "Problemas con el servicio" );
-      //      this.bShowSpinner = false;
-      //    }
-      //  });
+      this.customerServ.CCbxGetCustomersCombo( this.fleteForm.clientDesc )
+       .subscribe( {
+         next: (resp: ResponseGet) =>{
+           if(resp.status === 0){
+             this.cbxCustomers = resp.data
+           }
+           else{
+            this.cbxCustomers = [];
+           }
+         },
+         error: (ex) => {
+           this.servicesGServ.showSnakbar( "Problemas con el servicio" );
+           this.bShowSpinner = false;
+         }
+       });
   }
 
   cbxClientes_SelectedOption( event: MatAutocompleteSelectedEvent ) {
@@ -166,8 +224,8 @@ export class FletesComponent {
       
       const ODataCbx: any = event.option.value;
 
-      this.fleteForm.idSucursal = ODataCbx.idSucursal;
-      this.fleteForm.sucursalDesc = ODataCbx.name;
+      this.fleteForm.idCliente = ODataCbx.idCliente;
+      this.fleteForm.clientDesc = ODataCbx.name;
   
       //this.ev_fn_nextInput_keyup_enter( 'cbxSupplier' );
 
@@ -176,8 +234,53 @@ export class FletesComponent {
   }
 
   cbxClientes_Clear(){
-    this.fleteForm.idSucursal = 0;
-    this.fleteForm.sucursalDesc = '';
+    this.fleteForm.idCliente = 0;
+    this.fleteForm.clientDesc = '';
+  }
+  //--------------------------------------------------------------------------
+  // MÉTODOS PARA COMBO DE ÁREAS
+
+  cbxDireccionCliente: any[] = [];
+
+  cbxDireccionCliente_Search() {
+
+      this.customerServ.CCbxGetCustomersCombo( this.fleteForm.clientDesc )
+       .subscribe( {
+         next: (resp: ResponseGet) =>{
+           if(resp.status === 0){
+             this.cbxCustomers = resp.data
+           }
+           else{
+            this.cbxCustomers = [];
+           }
+         },
+         error: (ex) => {
+           this.servicesGServ.showSnakbar( "Problemas con el servicio" );
+           this.bShowSpinner = false;
+         }
+       });
+  }
+
+  cbxDireccionCliente_SelectedOption( event: MatAutocompleteSelectedEvent ) {
+
+    this.cbxClientes_Clear();
+
+    setTimeout (() => {
+      
+      const ODataCbx: any = event.option.value;
+
+      this.fleteForm.idCliente = ODataCbx.idCliente;
+      this.fleteForm.clientDesc = ODataCbx.name;
+  
+      //this.ev_fn_nextInput_keyup_enter( 'cbxSupplier' );
+
+    }, 1);
+
+  }
+
+  cbxDireccionCliente_Clear(){
+    this.fleteForm.idCliente = 0;
+    this.fleteForm.clientDesc = '';
   }
   //--------------------------------------------------------------------------
 

@@ -1,7 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject } from '@angular/core';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { Pagination } from 'src/app/interfaces/general.interfaces';
+import { Pagination, ResponseGet } from 'src/app/interfaces/general.interfaces';
+import { FletesService } from 'src/app/protected/services/fletes.service';
 import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 
@@ -59,6 +61,7 @@ export class FletesListComponent {
     , @Inject(MAT_DATE_LOCALE) private _locale: string
 
     , private authServ: AuthService
+    , private fletesServ: FletesService
     ) { }
 
     async ngOnInit() {
@@ -69,26 +72,53 @@ export class FletesListComponent {
       this._locale = 'mx';
       this._adapter.setLocale(this._locale);
 
-      //this.fn_getProductsListWithPage();
+      this.fn_getFletesListWithPage();
     }
 
     // #region MÉTODOS PARA EL FRONT
+
+    edit( id: number ){
+      this.servicesGServ.changeRouteWithParameter(`/${ this._appMain }/editFlete`, id)
+    }
 
     ////************************************************ */
     // MÉTODOS DE PAGINACIÓN
     changePagination(pag: Pagination) {
       this.pagination = pag;
-      //this.fn_getProductsListWithPage();
+      this.fn_getFletesListWithPage();
     }
 
     onChangeEvent(event: any){
       this.pagination.search = event.target.value;
-      //this.fn_getProductsListWithPage();
+      this.fn_getFletesListWithPage();
     }
     ////************************************************ */
 
     changeRoute( route: string ): void {
       this.servicesGServ.changeRoute( `/${ this._appMain }/${ route }` );
+    }
+
+    // #endregion
+
+    // #region MÉTODOS PARA EL BACK
+
+    fn_getFletesListWithPage() {
+
+      this.bShowSpinner = true;
+      this.fletesServ.CGetFletesListWithPage( this.pagination, this.parametersForm )
+      .subscribe({
+        next: (resp: ResponseGet) => {
+          console.log(resp)
+          this.catlist = resp.data.rows;
+          this.pagination.length = resp.data.count;
+          this.bShowSpinner = false;
+        },
+        error: (ex: HttpErrorResponse) => {
+          console.log( ex )
+          this.servicesGServ.showSnakbar( ex.error.data );
+          this.bShowSpinner = false;
+        }
+      })
     }
 
     // #endregion

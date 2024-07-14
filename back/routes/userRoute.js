@@ -4,13 +4,17 @@ const { check } = require('express-validator')
 const { validarCampos } = require('../middlewares/validar-campos')
 const { esRolValido, existeEmail } = require('../helpers/db-validators/user-validator');
 
-const { getUsersList,
+const {
+    getUsersListWithPage,
+    getUsersList,
     usersPUT,
     usersPOST,
     usersDELETE } = require('../controllers/usersController');
 
 
 const router = Router();
+
+router.post('/getUsersListWithPage', getUsersListWithPage);
 
 router.post('/', getUsersList);
 

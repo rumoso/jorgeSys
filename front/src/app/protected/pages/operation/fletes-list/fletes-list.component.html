@@ -159,42 +159,35 @@
                         <tbody>
                             <tr *ngFor="let item of catlist">
                                 <td class="textAlingCenter">
-                                    <!-- <div style="width: 100px;">
+                                    <div style="width: 100px;">
                                         <span class="material-icons manitaSobre colorGreen"
-                                        matTooltip="Editar Producto"
-                                        (click)="edit( item.idProduct )">
+                                        matTooltip="Editar Flete"
+                                        (click)="edit( item.idFlete )">
                                             edit
                                         </span>
 
-                                        <span class="material-icons manitaSobre colorRed"
+                                        <!-- <span class="material-icons manitaSobre colorRed"
                                         matTooltip="Eliminar Producto"
                                         
                                             (click)="fn_disableProduct( item.idProduct )"
                                             *ngIf="item.active">
                                             delete_outline
-                                        </span>
+                                        </span> -->
 
-                                    </div> -->
-                                </td>
-                                <td class="textAlingLeft">
-                                    <div class="row">
-                                        <div class="col-md-1">
-                                            <mat-icon style="margin-top: -5px;" matPrefix class="my-icon">qr_code</mat-icon>
-                                        </div>
-                                        <div class="col-md-10">
-                                            <label style="margin-left: 10px;">{{ item.barCode }}</label>
-                                        </div>
                                     </div>
-                                    
                                 </td>
-                                <td class="textAlingLeft">{{ item.name }}</td>
+                                <td class="textAlingLeft">{{ item.titulo }}</td>
                                 
-                                <td class="textAlingRight">{{ item.cost | currency }}</td>
-                                <td class="textAlingRight">{{ item.price | currency }}</td>
-                                <td class="textAlingRight">{{ item.catInventaryVerify }} piezas</td>
-                                <td class="textAlingRight">{{ item.catInventary }} piezas</td>
-                                <td class="textAlingLeft">{{ item.gramos }}</td>
-                                <td class="textAlingCenter">{{ item.createDate | date:'dd-MM-yyyy' }}</td>
+                                <td class="textAlingLeft">{{ item.clientName }}</td>
+                                <td class="textAlingLeft"></td>
+                                <td class="textAlingLeft"></td>
+                                <td class="textAlingLeft"></td>
+                                <td class="textAlingLeft">{{ item.guia }}</td>
+                                <td class="textAlingLeft">{{ item.cartaPorte }}</td>
+                                <td class="textAlingCenter">
+                                    <mat-checkbox class="example-margin" [(ngModel)]="item.bFacturado" disabled></mat-checkbox>
+                                </td>
+                                <td class="textAlingRight">{{ item.userName }}</td>
                                 <td class="textAlingCenter">
                                     <mat-checkbox class="example-margin" [(ngModel)]="item.active" disabled></mat-checkbox>
                                 </td>

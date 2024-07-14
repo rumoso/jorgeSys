@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -9,6 +10,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+
+  private _appMain: string = environment.appMain;
 
   hidePwd: boolean = true;
 
@@ -26,7 +29,7 @@ export class LoginComponent {
       var idUserLogOn = this.authServ.getIdUserSession();
 
       if(idUserLogOn > 0){
-        this.servicesGServ.changeRoute( '/VioletaSistem/dashboard' );
+        this.servicesGServ.changeRoute( `/${ this._appMain }/dashboard` );
       }else{
         this.authServ.logout(false);
       }

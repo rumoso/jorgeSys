@@ -14,7 +14,7 @@ class Server {
         this.unidadMedidaPath = '/api/unidadmedida';
         this.inventaryPath = '/api/inventary';
         this.authPath = '/api/auth';
-        this.clientsPath = '/api/clients';
+        this.customersPath = '/api/customers';
         this.salesPath = '/api/sales';
 
         //CONEXION A LA BASE DE DATOS
@@ -49,11 +49,11 @@ class Server {
 
     routes() {
         this.app.use(this.usersPath, require('../routes/userRoute'));
-        this.app.use(this.productsPath, require('../routes/productsRoute'));
+        this.app.use(this.productsPath, require('../routes/fletesRoute'));
         this.app.use(this.unidadMedidaPath, require('../routes/unidadmedidaRoute'));
         this.app.use(this.inventaryPath, require('../routes/inventaryRoute'));
         this.app.use(this.authPath, require('../routes/authRoute'));
-        this.app.use(this.clientsPath, require('../routes/clientsRoute'));
+        this.app.use(this.customersPath, require('../routes/customersRoute'));
         this.app.use(this.salesPath, require('../routes/salesRoute'));
     }
 

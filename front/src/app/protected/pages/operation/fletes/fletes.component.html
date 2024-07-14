@@ -108,11 +108,11 @@
                             <mat-autocomplete autoActiveFirstOption
                                                 #cbxSucursal="matAutocomplete"
                                                 (optionSelected)="cbxClientes_SelectedOption( $event )">
-                                <mat-option *ngFor="let role of cbxClientes" [value]="role">
+                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
                                     {{ role.name }}
                                 </mat-option>
                 
-                                <mat-option value="" *ngIf="cbxClientes.length == 0 && fleteForm.clientDesc">
+                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
                                     No se encontró nada...
                                 </mat-option>
                 
@@ -161,8 +161,206 @@
                             color="primary"
                             type="submit"
                             class="marginRight10px"
+                            [disabled]="fleteForm.idCliente == 0"
+                            (click)="fn_saveFlete()">Guardar</button>
                             
-                            >Guardar</button>
+                            <button mat-raised-button
+                            type="button"
+                            class="marginRight10px"
+                            (click)="changeRoute('fleteList')">Cancelar</button>
+                            
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="divMain textAlingCenter" style="padding: 30px;">
+    <div class="divTitle-center">
+        Agregar
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+                <br>
+
+                <div class="row">
+                            
+                    <div class="col-md-8">
+                        <mat-form-field
+                        style="width: 100%;"
+                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
+                            <input type="text"
+                                    id="cbxDireccionCliente"
+                                    style="width: 100%;"
+                                    placeholder="Selecciona una dirección del cliente..."
+                                    aria-label="Number"
+                                    matInput
+                                    [(ngModel)]="fleteForm.clientDesc"
+                                    [matAutocomplete]="cbxDireccionCliente"
+                                    
+                                    (input)="cbxDireccionCliente_Search()"
+                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
+                                    
+                                    (click)="cbxDireccionCliente_Clear()">
+                                    <button *ngIf="fleteForm.sucursalDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                            <mat-autocomplete autoActiveFirstOption
+                                                #cbxDireccionCliente="matAutocomplete"
+                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
+                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
+                                    {{ role.name }}
+                                </mat-option>
+                
+                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
+                                    No se encontró nada...
+                                </mat-option>
+                
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-2">
+                        <mat-form-field style="width: 200px;">
+                          <mat-label>Fecha de cita:</mat-label>
+                          <input matInput [matDatepicker]="picker" placeholder="Seleccione una fecha" [(ngModel)]="cargaForm.fechaCita">
+                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                        
+                        
+                    </div>
+
+                    <div class="col-md-2">
+                        <mat-form-field style="width: 200px;">
+                            <mat-label>Hora de cita:</mat-label>
+                            <input matInput [ngxTimepicker]="timepicker" placeholder="Seleccione una hora" [(ngModel)]="cargaForm.horaCita">
+                            <ngx-material-timepicker-toggle matSuffix [for]="timepicker"></ngx-material-timepicker-toggle>
+                            <ngx-material-timepicker #timepicker></ngx-material-timepicker>
+                          </mat-form-field>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-8">
+                        <mat-form-field
+                        style="width: 100%;"
+                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
+                            <input type="text"
+                                    id="cbxDireccionCliente"
+                                    style="width: 100%;"
+                                    placeholder="Selecciona un chofer..."
+                                    aria-label="Number"
+                                    matInput
+                                    [(ngModel)]="fleteForm.clientDesc"
+                                    [matAutocomplete]="cbxDireccionCliente"
+                                    
+                                    (input)="cbxDireccionCliente_Search()"
+                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
+                                    
+                                    (click)="cbxDireccionCliente_Clear()">
+                                    <button *ngIf="fleteForm.sucursalDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                            <mat-autocomplete autoActiveFirstOption
+                                                #cbxDireccionCliente="matAutocomplete"
+                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
+                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
+                                    {{ role.name }}
+                                </mat-option>
+                
+                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
+                                    No se encontró nada...
+                                </mat-option>
+                
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-4">
+                        <mat-form-field
+                        style="width: 100%;"
+                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
+                            <input type="text"
+                                    id="cbxDireccionCliente"
+                                    style="width: 100%;"
+                                    placeholder="Selecciona una unidad..."
+                                    aria-label="Number"
+                                    matInput
+                                    [(ngModel)]="fleteForm.clientDesc"
+                                    [matAutocomplete]="cbxDireccionCliente"
+                                    
+                                    (input)="cbxDireccionCliente_Search()"
+                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
+                                    
+                                    (click)="cbxDireccionCliente_Clear()">
+                                    <button *ngIf="fleteForm.sucursalDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                            <mat-autocomplete autoActiveFirstOption
+                                                #cbxDireccionCliente="matAutocomplete"
+                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
+                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
+                                    {{ role.name }}
+                                </mat-option>
+                
+                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
+                                    No se encontró nada...
+                                </mat-option>
+                
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <mat-form-field class="with100">
+                            <mat-label>Guia</mat-label>
+                            <input #tbxGuia matInput placeholder="Ingrese una guía"
+                            [(ngModel)]="fleteForm.guia"
+                            >
+                        </mat-form-field>
+                    </div>
+                    
+
+                    <div class="col-md-4">
+                        <mat-form-field class="with100">
+                            <mat-label>Carta Porte</mat-label>
+                            <input id="tbxCost" matInput placeholder="Ingrese una Carta Porte"
+                            type="number"
+                            [(ngModel)]="fleteForm.cartaPorte">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-2">
+                        <mat-checkbox class="example-margin" [(ngModel)]="fleteForm.bFacturado">Facturado</mat-checkbox>
+                    </div>
+
+                    <div class="col-md-2">
+                        <mat-checkbox class="example-margin" [(ngModel)]="fleteForm.active">Activo</mat-checkbox>
+                    </div>
+
+                </div>
+
+                <div class="row top10px">
+                    <div class="col-md-12">
+                        <div style="float: left;">
+                            <button id="btnSave"
+                            mat-raised-button
+                            color="primary"
+                            type="submit"
+                            class="marginRight10px"
+                            [disabled]="fleteForm.idCliente == 0"
+                            (click)="fn_saveFlete()">Guardar</button>
                             
                             <button mat-raised-button
                             type="button"

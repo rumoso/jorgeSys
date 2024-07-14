@@ -6,17 +6,20 @@ const { esRolValido, existeEmail } = require('../helpers/db-validators/user-vali
 
 const { 
   getClientsListWithPage
+  , cbxGetCustomersCombo
   , getClientByID
   , insertClient
   , updateClient
   , deleteClient
   , getClientsToSale
- } = require('../controllers/clientsController');
+ } = require('../controllers/customersController');
 
 
 const router = Router();
 
 router.post('/getClientsListWithPage', getClientsListWithPage);
+
+router.post('/cbxGetCustomersCombo', cbxGetCustomersCombo);
 
 router.post('/getClientByID', [
   check('idClient','Id obligatorio').not().isEmpty(),

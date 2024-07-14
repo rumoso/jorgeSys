@@ -12,6 +12,7 @@ import { environment } from 'src/environments/environment';
 export class MainComponent implements OnInit {
 
   private _appMain: string = environment.appMain;
+  public _appName: string = environment.appName;
   
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
