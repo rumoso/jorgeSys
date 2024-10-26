@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  baseUrl: "http://127.0.0.1:8082"
-  //baseUrl: "https://lifeagricultureapp.hugozavala.com"
+  //baseUrl: "http://127.0.0.1:8082"
+  baseUrl: "https://api.truck.ruitza.com"
 };
 
 /*

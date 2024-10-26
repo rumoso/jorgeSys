@@ -15,6 +15,14 @@ const routes: Routes = [
     path: 'start',
     loadChildren: () => import('./pages/start/start.module').then( m => m.StartPageModule)
   },
+  {
+    path: 'folios-list',
+    loadChildren: () => import('./pages/folios-list/folios-list.module').then( m => m.FoliosListPageModule)
+  },
+  {
+    path: 'folio',
+    loadChildren: () => import('./pages/folio/folio.module').then( m => m.FolioPageModule)
+  },
 ];
 
 @NgModule({

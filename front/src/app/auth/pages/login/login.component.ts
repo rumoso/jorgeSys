@@ -48,7 +48,7 @@ export class LoginComponent {
           .subscribe({
             next: (resp) => {
               if( resp.status === 0 ){
-                this.servicesGServ.changeRoute( '/VioletaSistem/dashboard' );
+                this.servicesGServ.changeRoute( '/TruckManager/dashboard' );
               }else{
                 this.servicesGServ.showSnakbar(resp.message);
               }

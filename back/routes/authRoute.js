@@ -8,6 +8,8 @@ const {
 
     login
     , getMenuByPermissions
+
+    , app_login
     
 } = require('../controllers/authController');
 
@@ -25,5 +27,11 @@ router.post('/getMenuByPermissions',[
     validarCampos
 
 ], getMenuByPermissions );
+
+router.post('/app_login', [
+    check('username','Usuario obligatorio').not().isEmpty(),
+    check('pwd','Contraseña obligatoria').not().isEmpty(),
+    validarCampos
+], app_login);
 
 module.exports = router;

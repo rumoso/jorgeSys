@@ -323,3 +323,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   .autoHeight {
     height: auto !important;
   }
+
+.border1px {
+    border: 1px solid #000;
+}

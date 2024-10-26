@@ -1,0 +1,80 @@
+<div class="" style="padding: 30px;padding-top: 60px; position: relative;">
+    <div class="divTitle-center">
+        {{title}}
+    </div>
+
+    <button mat-icon-button
+        style="position: absolute; top: 10px; right: 10px;"
+        (click)="fn_CerrarMDL(0)">
+        <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="row">
+        <div class="col-md-12">
+
+                <br>
+
+                <div class="row">
+
+                    <div class="col-md-2">
+                        <mat-form-field class="with100">
+                            <mat-label>Folio</mat-label>
+                            <input matInput placeholder="Ingrese un folio"
+                            [(ngModel)]="folio.folio">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-8">
+                        <mat-form-field class="with100">
+                            <mat-label>Recibió</mat-label>
+                            <input matInput placeholder="Ingrese quien recibió"
+                            [(ngModel)]="folio.recibidoPor"
+                            type="text">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-2">
+                        <mat-form-field class="with100">
+                            <mat-label>Scan</mat-label>
+                            <input matInput placeholder="Ingrese scan"
+                            [(ngModel)]="folio.scan"
+                            type="text">
+                        </mat-form-field>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <mat-form-field class="with100">
+                            <mat-label>Nota</mat-label>
+                            <textarea matInput placeholder="Ingrese una nota"
+                            [(ngModel)]="folio.nota"
+                            type="text"></textarea>
+                        </mat-form-field>
+                    </div>
+
+                </div>
+
+                <div class="row top10px">
+                    <div class="col-md-12">
+                        <div style="float: left;">
+                            <button id="btnSave"
+                            mat-raised-button
+                            color="primary"
+                            type="submit"
+                            class="marginRight10px"
+                            [disabled]="folio.folio.length == 0" 
+                            (click)="fn_insertFolio()">{{( folio.idFolio > 0 ? 'Editar folio' : 'Agregar folio' )}}</button>
+                            
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+</div>
+    
+<app-spinner [hidden]="!bShowSpinner"></app-spinner>

@@ -24,7 +24,10 @@ export class LoginPage implements OnInit {
     , private authServ: AuthService
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+
+    await this.authServ.validaSesion('/start');
+
   }
 
   public async loginON() {
@@ -38,7 +41,7 @@ export class LoginPage implements OnInit {
         if(resp.status == 0){
           await this.authServ.saveToken( resp.data.token );
           await this.SQLiteServ.set('user', resp.data.user);
-          
+
           this.navCtrl.navigateRoot( '/start', { animated: true } );
           this.uiServ.showToast('Usuario correcto');
         }

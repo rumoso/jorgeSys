@@ -6,7 +6,6 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 import { Pagination, ResponseGet } from 'src/app/interfaces/general.interfaces';
 import { ResponseDB_CRUD } from 'src/app/protected/interfaces/global.interfaces';
 import { ActionsService } from 'src/app/protected/services/actions.service';
-import { FxrateService } from 'src/app/protected/services/fxrate.service';
 import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 

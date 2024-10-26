@@ -82,10 +82,7 @@
                             
                     <div class="col-md-12">
                         <mat-label>Cliente: </mat-label>
-                        <span class="material-icons manitaSobre colorGreen"
-                            (click)="showCat( 'Groups' )">
-                            add_circle_outline
-                        </span>
+                        
                         <mat-form-field
                         style="width: 100%;"
                         (click)="cbxClientes_Clear(); cbxClientes_Search();">
@@ -95,7 +92,7 @@
                                     placeholder="Selecciona..."
                                     aria-label="Number"
                                     matInput
-                                    [(ngModel)]="fleteForm.clientDesc"
+                                    [(ngModel)]="fleteForm.clientName"
                                     [matAutocomplete]="cbxSucursal"
                                     
                                     (input)="cbxClientes_Search()"
@@ -112,7 +109,7 @@
                                     {{ role.name }}
                                 </mat-option>
                 
-                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
+                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientName">
                                     No se encontró nada...
                                 </mat-option>
                 
@@ -168,6 +165,14 @@
                             type="button"
                             class="marginRight10px"
                             (click)="changeRoute('fleteList')">Cancelar</button>
+
+                            <button id="btnSave"
+                            mat-raised-button
+                            color="primary"
+                            type="submit"
+                            class="marginRight10px"
+                            [disabled]="idFlete == 0"
+                            (click)="showCargaReparto(null)">Agregar detalle del flete</button>
                             
                         </div>
                     </div>
@@ -177,199 +182,182 @@
     </div>
 </div>
 
-<div class="divMain textAlingCenter" style="padding: 30px;">
-    <div class="divTitle-center">
-        Agregar
+<!-- <div class="divMain" style="margin-top: 10px !important">
+
+    <div class="row">
+        <div class="col-md-12">
+            <span class="material-icons manitaSobre colorGreen"
+                (click)="showCargaReparto()">
+                add_circle_outline
+            </span>
+        </div>
+    </div>
+    
+</div> -->
+
+<div class="divMain" style="margin-top: 10px !important" *ngFor="let item of cargasDescargasList">
+    <div class="row" style="margin-top: -35px;">
+        <div class="col-md-12">
+            <div class="badge bg-primary text-wrap" style="font-size: 15px;">
+                {{( item.idMovimientoType == 1 ? 'Carga': 'Reparto' ) }}
+            </div>
+            <span class="material-icons manitaSobre colorGreen"
+                (click)="showCargaReparto( item )">
+                edit
+            </span>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
 
-                <br>
+            <div class="row">
+                <div class="col-md-1 border1px">
+                    <span>Dirección:</span>
+                </div>
+                <div class="col-md-5 border1px">
+                    <span><strong>{{item.direccion}}</strong></span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span>Cita:</span>
+                </div>
+                <div class="col-md-5 border1px">
+                    <span><strong>{{item.fechaCita}}</strong></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1 border1px">
+                    <span>Chofer:</span>
+                </div>
+                <div class="col-md-5 border1px">
+                    <span><strong>{{item.choferName}}</strong></span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span>Hora:</span>
+                </div>
+                <div class="col-md-2 border1px">
+                    <span><strong>{{item.horaCita}}</strong></span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span>Unidad:</span>
+                </div>
+                <div class="col-md-2 border1px">
+                    <span><strong>{{item.nombreUnidad}}</strong></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1 border1px">
+                    <span>Apoyo:</span>
+                </div>
+                <div class="col-md-5 border1px">
+                    <span><strong>{{item.apoyo}}</strong></span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span>Chep:</span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span><strong>{{item.tChep}}</strong></span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span>Blanca:</span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span><strong>{{item.tBlanca}}</strong></span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span>Agranel:</span>
+                </div>
+                <div class="col-md-1 border1px">
+                    <span><strong>{{item.tAgranel}}</strong></span>
+                </div>
+            </div>
 
-                <div class="row">
-                            
-                    <div class="col-md-8">
-                        <mat-form-field
-                        style="width: 100%;"
-                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
-                            <input type="text"
-                                    id="cbxDireccionCliente"
-                                    style="width: 100%;"
-                                    placeholder="Selecciona una dirección del cliente..."
-                                    aria-label="Number"
-                                    matInput
-                                    [(ngModel)]="fleteForm.clientDesc"
-                                    [matAutocomplete]="cbxDireccionCliente"
-                                    
-                                    (input)="cbxDireccionCliente_Search()"
-                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
-                                    
-                                    (click)="cbxDireccionCliente_Clear()">
-                                    <button *ngIf="fleteForm.sucursalDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
-                                        <mat-icon>close</mat-icon>
-                                    </button>
-                            <mat-autocomplete autoActiveFirstOption
-                                                #cbxDireccionCliente="matAutocomplete"
-                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
-                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
-                                    {{ role.name }}
-                                </mat-option>
-                
-                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
-                                    No se encontró nada...
-                                </mat-option>
-                
-                            </mat-autocomplete>
-                        </mat-form-field>
-                    </div>
+            <div class="row" *ngIf="item.idEntrada > 0 || item.idSalida > 0">
+                <div class="col-md-1 border1px" *ngIf="item.idEntrada > 0">
+                    <span>Entrada:</span>
+                </div>
+                <div class="col-md-3 border1px" *ngIf="item.idEntrada > 0">
+                    <span><strong>{{item.entradaDate}} {{item.entradaDateHours}}</strong></span>
+                    <mat-icon class="manitaSobre" (click)="openGoogleMaps( item.entradaLatGPS, item.entradaLongGPS )">gps_fixed</mat-icon>
+                </div>
+                <div class="col-md-1 border1px" *ngIf="item.idSalida > 0">
+                    <span>Salida:</span>
+                </div>
+                <div class="col-md-3 border1px" *ngIf="item.idSalida > 0">
+                    <span><strong>{{item.salidaDate}} {{item.salidaDateHours}}</strong></span>
+                    <mat-icon class="manitaSobre" (click)="openGoogleMaps( item.salidaLatGPS, item.salidaLongGPS )">gps_fixed</mat-icon>
+                </div>
+                <div class="col-md-1 border1px" *ngIf="item.idSalida > 0">
+                    <span>Tiempo:</span>
+                </div>
+                <div class="col-md-3 border1px" *ngIf="item.idSalida > 0">
+                    <span><strong>{{item.duracion}}</strong></span>
+                </div>
+            </div>
 
-                    <div class="col-md-2">
-                        <mat-form-field style="width: 200px;">
-                          <mat-label>Fecha de cita:</mat-label>
-                          <input matInput [matDatepicker]="picker" placeholder="Seleccione una fecha" [(ngModel)]="cargaForm.fechaCita">
-                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                          <mat-datepicker #picker></mat-datepicker>
-                        </mat-form-field>
+            <div class="row top10px">
+                <div class="col-md-12">
+                    <div style="float: left;">
+
+                        <button id="btnSave"
+                        mat-raised-button
+                        color="primary"
+                        type="submit"
+                        class="marginRight10px"
+                        [disabled]="idFlete == 0"
+                        (click)="showAddFolio( item.idCargaReparto, null )">Agregar Folio</button>
                         
-                        
-                    </div>
-
-                    <div class="col-md-2">
-                        <mat-form-field style="width: 200px;">
-                            <mat-label>Hora de cita:</mat-label>
-                            <input matInput [ngxTimepicker]="timepicker" placeholder="Seleccione una hora" [(ngModel)]="cargaForm.horaCita">
-                            <ngx-material-timepicker-toggle matSuffix [for]="timepicker"></ngx-material-timepicker-toggle>
-                            <ngx-material-timepicker #timepicker></ngx-material-timepicker>
-                          </mat-form-field>
-                    </div>
-
-                </div>
-
-                <div class="row">
-
-                    <div class="col-md-8">
-                        <mat-form-field
-                        style="width: 100%;"
-                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
-                            <input type="text"
-                                    id="cbxDireccionCliente"
-                                    style="width: 100%;"
-                                    placeholder="Selecciona un chofer..."
-                                    aria-label="Number"
-                                    matInput
-                                    [(ngModel)]="fleteForm.clientDesc"
-                                    [matAutocomplete]="cbxDireccionCliente"
-                                    
-                                    (input)="cbxDireccionCliente_Search()"
-                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
-                                    
-                                    (click)="cbxDireccionCliente_Clear()">
-                                    <button *ngIf="fleteForm.sucursalDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
-                                        <mat-icon>close</mat-icon>
-                                    </button>
-                            <mat-autocomplete autoActiveFirstOption
-                                                #cbxDireccionCliente="matAutocomplete"
-                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
-                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
-                                    {{ role.name }}
-                                </mat-option>
-                
-                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
-                                    No se encontró nada...
-                                </mat-option>
-                
-                            </mat-autocomplete>
-                        </mat-form-field>
-                    </div>
-
-                    <div class="col-md-4">
-                        <mat-form-field
-                        style="width: 100%;"
-                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
-                            <input type="text"
-                                    id="cbxDireccionCliente"
-                                    style="width: 100%;"
-                                    placeholder="Selecciona una unidad..."
-                                    aria-label="Number"
-                                    matInput
-                                    [(ngModel)]="fleteForm.clientDesc"
-                                    [matAutocomplete]="cbxDireccionCliente"
-                                    
-                                    (input)="cbxDireccionCliente_Search()"
-                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
-                                    
-                                    (click)="cbxDireccionCliente_Clear()">
-                                    <button *ngIf="fleteForm.sucursalDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
-                                        <mat-icon>close</mat-icon>
-                                    </button>
-                            <mat-autocomplete autoActiveFirstOption
-                                                #cbxDireccionCliente="matAutocomplete"
-                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
-                                <mat-option *ngFor="let role of cbxCustomers" [value]="role">
-                                    {{ role.name }}
-                                </mat-option>
-                
-                                <mat-option value="" *ngIf="cbxCustomers.length == 0 && fleteForm.clientDesc">
-                                    No se encontró nada...
-                                </mat-option>
-                
-                            </mat-autocomplete>
-                        </mat-form-field>
-                    </div>
-                    
-                </div>
-
-                <div class="row">
-
-                    <div class="col-md-4">
-                        <mat-form-field class="with100">
-                            <mat-label>Guia</mat-label>
-                            <input #tbxGuia matInput placeholder="Ingrese una guía"
-                            [(ngModel)]="fleteForm.guia"
-                            >
-                        </mat-form-field>
-                    </div>
-                    
-
-                    <div class="col-md-4">
-                        <mat-form-field class="with100">
-                            <mat-label>Carta Porte</mat-label>
-                            <input id="tbxCost" matInput placeholder="Ingrese una Carta Porte"
-                            type="number"
-                            [(ngModel)]="fleteForm.cartaPorte">
-                        </mat-form-field>
-                    </div>
-
-                    <div class="col-md-2">
-                        <mat-checkbox class="example-margin" [(ngModel)]="fleteForm.bFacturado">Facturado</mat-checkbox>
-                    </div>
-
-                    <div class="col-md-2">
-                        <mat-checkbox class="example-margin" [(ngModel)]="fleteForm.active">Activo</mat-checkbox>
-                    </div>
-
-                </div>
-
-                <div class="row top10px">
-                    <div class="col-md-12">
-                        <div style="float: left;">
-                            <button id="btnSave"
-                            mat-raised-button
-                            color="primary"
-                            type="submit"
-                            class="marginRight10px"
-                            [disabled]="fleteForm.idCliente == 0"
-                            (click)="fn_saveFlete()">Guardar</button>
-                            
-                            <button mat-raised-button
-                            type="button"
-                            class="marginRight10px"
-                            (click)="changeRoute('fleteList')">Cancelar</button>
-                            
-                        </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="row top10px">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <th class="textAlingCenter padding-th">Acciones</th>
+                                <th class="textAlingLeft padding-th">Folio</th>
+                                <th class="textAlingLeft padding-th">Recibió</th>
+                                <th class="textAlingLeft padding-th">Scan</th>
+                                <th class="textAlingLeft padding-th">Notas</th>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let itemTable of item.foliosList">
+                                    <td class="textAlingCenter">
+                                        <div style="width: 100px;">
+                                            <span class="material-icons manitaSobre colorGreen"
+                                            matTooltip="Editar Folio"
+                                            (click)="showAddFolio( item.idCargaReparto, itemTable )">
+                                                edit
+                                            </span>
+    
+                                            <span class="material-icons manitaSobre colorRed"
+                                            matTooltip="Eliminar Folio"
+                                            
+                                                (click)="fn_deleteFolio( itemTable )">
+                                                delete_outline
+                                            </span>
+    
+                                        </div>
+                                    </td>
+                                    <td class="textAlingLeft">
+                                        <div style="width: 100px;">
+                                            {{ itemTable.folio }}
+                                        </div>
+                                    </td>
+                                    <td class="textAlingLeft">
+                                        <div style="width: 200px;">
+                                            {{ itemTable.recibidoPor }}
+                                        </div>
+                                    <td class="textAlingLeft">{{ itemTable.scan }}</td>
+                                    <td class="textAlingLeft">{{ itemTable.nota }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>

@@ -9,13 +9,11 @@ class Server {
         this.app = express();
         this.port = process.env.PORT;
 
-        this.usersPath = '/api/users';
-        this.productsPath = '/api/products';
-        this.unidadMedidaPath = '/api/unidadmedida';
-        this.inventaryPath = '/api/inventary';
         this.authPath = '/api/auth';
         this.customersPath = '/api/customers';
-        this.salesPath = '/api/sales';
+        this.fletesPath = '/api/fletes';
+        this.choferesPath = '/api/choferes';
+        this.unidadesPath = '/api/unidades';
 
         //CONEXION A LA BASE DE DATOS
         this.dbConnection();
@@ -48,13 +46,11 @@ class Server {
     }
 
     routes() {
-        this.app.use(this.usersPath, require('../routes/userRoute'));
-        this.app.use(this.productsPath, require('../routes/fletesRoute'));
-        this.app.use(this.unidadMedidaPath, require('../routes/unidadmedidaRoute'));
-        this.app.use(this.inventaryPath, require('../routes/inventaryRoute'));
         this.app.use(this.authPath, require('../routes/authRoute'));
         this.app.use(this.customersPath, require('../routes/customersRoute'));
-        this.app.use(this.salesPath, require('../routes/salesRoute'));
+        this.app.use(this.fletesPath, require('../routes/fletesRoute'));
+        this.app.use(this.choferesPath, require('../routes/choferesRoute'));
+        this.app.use(this.unidadesPath, require('../routes/unidadesRoute'));
     }
 
     listen() {

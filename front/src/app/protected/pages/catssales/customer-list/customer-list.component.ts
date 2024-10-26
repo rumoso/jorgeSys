@@ -9,7 +9,6 @@ import { CustomersService } from 'src/app/protected/services/customers.service';
 import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 import { CustomerComponent } from '../customer/customer.component';
-import { ElectronicMoneyMDLComponent } from '../mdl/electronic-money-mdl/electronic-money-mdl.component';
 
 @Component({
   selector: 'app-customer-list',
@@ -170,23 +169,6 @@ export class CustomerListComponent implements OnInit {
 
   edit( id: number ){
     this.servicesGServ.changeRouteWithParameter(`/${ this._appMain }/editCustomer`, id)
-  }
-
-  fn_ShowAddElectronicMoney( idCustomer: number ){
-
-    var paramsMDL: any = {
-      idCustomer: idCustomer
-    }
-  
-    this.servicesGServ.showModalWithParams( ElectronicMoneyMDLComponent, paramsMDL, '1500px')
-    .afterClosed().subscribe({
-      next: ( resp ) =>{
-  
-        this.fn_getCustomersListWithPage();
-        
-      }
-    });
-  
   }
 
 }

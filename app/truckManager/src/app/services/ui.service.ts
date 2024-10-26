@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Injectable({
   providedIn: 'root'
@@ -40,5 +41,10 @@ export class UiService {
 
   public async hideLoading(loading: HTMLIonLoadingElement) {
     loading.dismiss();
+  }
+
+  async getCurrentLocation() {
+    const position = await Geolocation.getCurrentPosition();
+    return position;
   }
 }

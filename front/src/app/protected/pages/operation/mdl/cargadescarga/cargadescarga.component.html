@@ -1,0 +1,218 @@
+<div class="" style="padding: 30px;padding-top: 60px; position: relative;">
+    <div class="divTitle-center">
+        {{title}}
+    </div>
+
+    <button mat-icon-button
+        style="position: absolute; top: 10px; right: 10px;"
+        (click)="fn_CerrarMDL(0)">
+        <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="row">
+        <div class="col-md-12">
+
+                <br>
+
+                <div class="row">
+                            
+                    <div class="col-md-7">
+                        <mat-form-field
+                        style="width: 100%;"
+                        (click)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search();">
+                            <input type="text"
+                                    id="_cbxDireccionCliente"
+                                    style="width: 100%;"
+                                    placeholder="Selecciona una dirección del cliente..."
+                                    aria-label="Number"
+                                    matInput
+                                    [(ngModel)]="cargaForm.direccionDesc"
+                                    [matAutocomplete]="CBX_DireccionCliente"
+                                    
+                                    (input)="cbxDireccionCliente_Search()"
+                                    (focus)="cbxDireccionCliente_Clear(); cbxDireccionCliente_Search()"
+                                    
+                                    (click)="cbxDireccionCliente_Clear()">
+                                    <button *ngIf="cargaForm.direccionDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxDireccionCliente_Clear()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                            <mat-autocomplete autoActiveFirstOption
+                                                #CBX_DireccionCliente="matAutocomplete"
+                                                (optionSelected)="cbxDireccionCliente_SelectedOption( $event )">
+                                <mat-option *ngFor="let role of cbxDireccionClienteList" [value]="role">
+                                    <strong>{{ role.clientName }}</strong> - {{ role.direccionDesc }}
+                                </mat-option>
+                
+                                <mat-option value="" *ngIf="cbxDireccionClienteList.length == 0 && cargaForm.direccionDesc">
+                                    No se encontró nada...
+                                </mat-option>
+                
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-2">
+                        <mat-form-field style="width: 160px;">
+                          <mat-label>Fecha de cita:</mat-label>
+                          <input matInput [matDatepicker]="picker" placeholder="Seleccione una fecha" [(ngModel)]="cargaForm.fechaCita">
+                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                        
+                        
+                    </div>
+
+                    <div class="col-md-2">
+                          <mat-form-field appearance="fill">
+                            <mat-label>Hora de cita</mat-label>
+                            <input matInput placeholder="hh:mm:ss" [(ngModel)]="cargaForm.horaCita">
+                          </mat-form-field>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-8">
+                        <mat-form-field
+                        style="width: 100%;"
+                        (click)="cbxChoferes_Clear(); cbxChoferes_Search();">
+                            <input type="text"
+                                    id="cbxChoferes"
+                                    style="width: 100%;"
+                                    placeholder="Selecciona un chofer..."
+                                    aria-label="Number"
+                                    matInput
+                                    [(ngModel)]="cargaForm.choferName"
+                                    [matAutocomplete]="cbxChoferes"
+                                    
+                                    (input)="cbxChoferes_Search()"
+                                    (focus)="cbxChoferes_Clear(); cbxChoferes_Search()"
+                                    
+                                    (click)="cbxChoferes_Clear()">
+                                    <button *ngIf="cargaForm.choferName" matSuffix mat-icon-button aria-label="Clear" (click)="cbxChoferes_Clear()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                            <mat-autocomplete autoActiveFirstOption
+                                                #cbxChoferes="matAutocomplete"
+                                                (optionSelected)="cbxChoferes_SelectedOption( $event )">
+                                <mat-option *ngFor="let role of cbxChoferesList" [value]="role">
+                                    {{ role.choferName }}
+                                </mat-option>
+                
+                                <mat-option value="" *ngIf="cbxChoferesList.length == 0 && cargaForm.choferName">
+                                    No se encontró nada...
+                                </mat-option>
+                
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-4">
+                        <mat-form-field
+                        style="width: 100%;"
+                        (click)="cbxUnidades_Clear(); cbxUnidades_Search();">
+                            <input type="text"
+                                    id="cbxUnidades"
+                                    style="width: 100%;"
+                                    placeholder="Selecciona una unidad..."
+                                    aria-label="Number"
+                                    matInput
+                                    [(ngModel)]="cargaForm.unidadDesc"
+                                    [matAutocomplete]="cbxUnidades"
+                                    
+                                    (input)="cbxUnidades_Search()"
+                                    (focus)="cbxUnidades_Clear(); cbxUnidades_Search()"
+                                    
+                                    (click)="cbxUnidades_Clear()">
+                                    <button *ngIf="cargaForm.unidadDesc" matSuffix mat-icon-button aria-label="Clear" (click)="cbxUnidades_Clear()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                            <mat-autocomplete autoActiveFirstOption
+                                                #cbxUnidades="matAutocomplete"
+                                                (optionSelected)="cbxUnidades_SelectedOption( $event )">
+                                <mat-option *ngFor="let role of cbxUnidadesList" [value]="role">
+                                    {{ role.unidadDesc }}
+                                </mat-option>
+                
+                                <mat-option value="" *ngIf="cbxUnidadesList.length == 0 && cargaForm.unidadDesc">
+                                    No se encontró nada...
+                                </mat-option>
+                
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+                    
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <mat-form-field class="with100">
+                            <mat-label>Apoyo</mat-label>
+                            <input matInput placeholder="Ingrese chep"
+                            [(ngModel)]="cargaForm.apoyo"
+                            >
+                        </mat-form-field>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <mat-form-field class="with100">
+                            <mat-label>Chep</mat-label>
+                            <input matInput placeholder="Ingrese chep"
+                            [(ngModel)]="cargaForm.tChep"
+                            type="number">
+                        </mat-form-field>
+                    </div>
+                    
+
+                    <div class="col-md-4">
+                        <mat-form-field class="with100">
+                            <mat-label>Blanca</mat-label>
+                            <input matInput placeholder="Ingrese Blanca"
+                            type="number"
+                            [(ngModel)]="cargaForm.tBlanca">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-4">
+                        <mat-form-field class="with100">
+                            <mat-label>Agranel</mat-label>
+                            <input matInput placeholder="Ingrese Agranel"
+                            type="number"
+                            [(ngModel)]="cargaForm.tAgranel">
+                        </mat-form-field>
+                    </div>
+
+                </div>
+
+                <div class="row top10px">
+                    <div class="col-md-12">
+                        <div style="float: left;">
+                            <button id="btnSave"
+                            mat-raised-button
+                            color="primary"
+                            type="submit"
+                            class="marginRight10px"
+                            [disabled]="ODataP.idCliente == 0 || cargaForm.idDireccionCliente == 0"
+                            (click)="fn_saveCargaRepato()">Agregar</button>
+<!--                             
+                            <button mat-raised-button
+                            type="button"
+                            class="marginRight10px"
+                            (click)="changeRoute('fleteList')">Limpiar</button> -->
+                            
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+</div>
+    
+<app-spinner [hidden]="!bShowSpinner"></app-spinner>

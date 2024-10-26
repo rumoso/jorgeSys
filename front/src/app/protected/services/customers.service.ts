@@ -94,4 +94,14 @@ export class CustomersService {
     }
     return this.http.post<ResponseDB_CRUD>( `${ this.baseURL }/${ this._api }/deleteCustomer`, data);
   }
+
+  CCbxDireccionCliente( search: string ): Observable<ResponseGet> {
+    var data: any = {
+      search: search
+    }
+
+    data.idUserLogON = this.authServ.getIdUserSession();
+
+    return this.http.post<ResponseGet>( `${ this.baseURL }/${ this._api }/cbxDireccionCliente`, data);
+  }
 }

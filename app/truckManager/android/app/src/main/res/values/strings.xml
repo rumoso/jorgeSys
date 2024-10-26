@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">truckManager</string>
-    <string name="title_activity_main">truckManager</string>
-    <string name="package_name">io.ionic.starter</string>
-    <string name="custom_url_scheme">io.ionic.starter</string>
+    <string name="app_name">Truck Manager App</string>
+    <string name="title_activity_main">Truck Manager App</string>
+    <string name="package_name">com.ruitza.truckManagerApp</string>
+    <string name="custom_url_scheme">com.ruitza.truckManagerApp</string>
 </resources>

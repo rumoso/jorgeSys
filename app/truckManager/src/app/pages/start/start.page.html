@@ -5,7 +5,7 @@
 
     <ion-row>
       <ion-col size="12">
-        
+
         <!-- <ion-card *ngFor="let item of OSalesList" >
           <ion-card-header>
             <ion-card-title>
@@ -15,32 +15,104 @@
             </ion-card-title>
             <ion-card-subtitle>{{ item.clientName }}</ion-card-subtitle>
           </ion-card-header>
-        
+
           <ion-card-content>
             {{ item.createDate | date:'medium' }}
           </ion-card-content>
         </ion-card> -->
-        <ion-card>
+        <ion-card *ngFor="let item of ORutasList">
           <ion-card-header>
-            <ion-card-title>Título de la tarjeta</ion-card-title>
+            <ion-card-title>
+              <ion-label color="primary">
+                <ion-icon name="cube-outline"></ion-icon> {{item.movTypeDesc}}
+              </ion-label>
+              <ion-button fill="clear" slot="end">
+                <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+              </ion-button>
+            </ion-card-title>
           </ion-card-header>
-        
+
           <ion-card-content>
-            Detalle de la tarjeta
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12">
+                  <strong>Dirección:</strong> {{item.direccion}}
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="6">
+                  <strong>Chofer:</strong> {{item.choferName}}
+                </ion-col>
+                <ion-col size="6">
+                  <strong>Cita:</strong> {{item.fechaCita}}
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="6">
+                  <strong>Apoyo:</strong> {{item.apoyo}}
+                </ion-col>
+                <ion-col size="6">
+                  <strong>Hora:</strong> {{item.horaCita}}
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="6">
+                  <strong>Chep:</strong> {{item.tChep}}
+                </ion-col>
+                <ion-col size="6">
+                  <strong>Unidad:</strong> {{item.nombreUnidad}}
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="6">
+                  <strong>Blanca:</strong> {{item.tBlanca}}
+                </ion-col>
+                <ion-col size="6">
+                  <strong>Agranel:</strong> {{item.tAgranel}}
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="item.idEntrada > 0">
+                <ion-col size="8">
+                  <strong>Entrada:</strong> {{item.entradaDate}}
+                </ion-col>
+                <ion-col size="4">
+                  {{item.entradaDateHours}}
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="item.idSalida > 0">
+                <ion-col size="8">
+                  <strong>Salida:</strong> {{item.salidaDate}}
+                </ion-col>
+                <ion-col size="4">
+                  {{item.salidaDateHours}}
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12">
+                  <ion-button expand="full"
+                  color="success"
+                  (click)="showFolios( item.idCargaReparto )">LISTA DE FOLIOS</ion-button>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="6">
+                  <ion-button expand="full"
+                  color="success"
+                  (click)="fn_CInsertCargaDescargaMovimiento( item, 3 )"
+                  [disabled]="item.idSalida > 0">Entrada</ion-button>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-button expand="full"
+                  color="danger"
+                  (click)="fn_CInsertCargaDescargaMovimiento( item, 4 )"
+                  [disabled]="item.idEntrada == 0">Salida</ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
           </ion-card-content>
-        
-          <ion-row>
-            <ion-col>
-              <ion-button expand="block">Botón 1</ion-button>
-            </ion-col>
-            <ion-col>
-              <ion-button expand="block">Botón 2</ion-button>
-            </ion-col>
-          </ion-row>
         </ion-card>
-        <ion-infinite-scroll >
-          <ion-infinite-scroll-content loadingText="Please wait..." loadingSpinner="bubbles" ></ion-infinite-scroll-content>
-        </ion-infinite-scroll>
 
       </ion-col>
     </ion-row>

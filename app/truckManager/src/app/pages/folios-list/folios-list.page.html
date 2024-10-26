@@ -1,0 +1,43 @@
+<app-header title="Folios" icon="backButton"></app-header>
+
+<ion-content [fullscreen]="true">
+
+  <ion-grid>
+
+    <ion-row>
+      <ion-col size="12">
+        <ion-list>
+          <ion-item *ngFor="let item of oFoliosList">
+
+            <ion-grid (click)="showAddFolio( item.idFolio )">
+              <ion-row>
+
+                <ion-col size="12">
+                  <ion-label>
+                    <h2>
+                      <ion-icon name="menu-outline"></ion-icon> Folio: {{item.folio}}
+                    </h2>
+                    <h3 *ngIf="item.recibidoPor">
+                      <ion-icon name="person-circle-outline"></ion-icon> Recibido: {{item.recibidoPor}}
+                    </h3>
+                    <h3 *ngIf="item.scan">
+                      <ion-icon name="scan-circle-outline"></ion-icon> Scan: {{item.scan}}
+                    </h3>
+                    <h3 *ngIf="item.nota">
+                      <ion-icon name="clipboard-outline"></ion-icon> Nota: {{item.nota}}
+                    </h3>
+                  </ion-label>
+                </ion-col>
+
+              </ion-row>
+            </ion-grid>
+
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+
+</ion-content>

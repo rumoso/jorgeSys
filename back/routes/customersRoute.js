@@ -12,6 +12,7 @@ const {
   , updateClient
   , deleteClient
   , getClientsToSale
+  , cbxDireccionCliente
  } = require('../controllers/customersController');
 
 
@@ -49,5 +50,7 @@ router.post('/deleteClient', [
 ], deleteClient);
 
 router.post('/getClientsToSale', getClientsToSale);
+
+router.post('/cbxDireccionCliente', cbxDireccionCliente);
 
 module.exports = router;

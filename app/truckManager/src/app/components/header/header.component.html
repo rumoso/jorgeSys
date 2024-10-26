@@ -2,14 +2,15 @@
 </ion-header>
 <ion-header [translucent]="true">
   <ion-toolbar>
-    
+
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <!-- <ion-menu-button *ngIf="icon == 'home'"></ion-menu-button> -->
+      <ion-back-button *ngIf="icon != 'home'" defaultHref="/start"></ion-back-button>
     </ion-buttons>
 
-    
+
     <ion-title color="primary" class="ion-text-capitalize">
-      <img  width="35" src="assets/img/IcoAgri.png">
+      <img  width="20" src="assets/icon/truckIco.png">
       {{title}}
     </ion-title>
 
@@ -19,6 +20,6 @@
         <ion-icon slot="icon-only" name="exit"></ion-icon>
       </ion-button>
     </ion-buttons>
-    
+
   </ion-toolbar>
 </ion-header>

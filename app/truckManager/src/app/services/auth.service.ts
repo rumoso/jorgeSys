@@ -4,7 +4,7 @@ import { NavController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 
 import { SQLiteService } from './sqlite.service';
-import { Observable } from 'rxjs';
+import { ConnectableObservable, Observable } from 'rxjs';
 import { ResponseGet } from '../interfaces/global.interface';
 
 @Injectable({
@@ -22,30 +22,33 @@ export class AuthService {
     private http: HttpClient
     , private SQLiteServ: SQLiteService
     , private navCtrl: NavController
-    ) { }
+    ) {
+      this.cargarToken();
+    }
 
     public login( userName: string, pwd: string): Observable<ResponseGet>{
       const data = {
         username: userName
         ,pwd: pwd
       };
-  
-      return this.http.post<ResponseGet>(`${ this.baseURL }/${ this._api }/login` ,data);
+
+      return this.http.post<ResponseGet>(`${ this.baseURL }/${ this._api }/app_login` ,data);
     }
 
     public async saveToken( token: string ) {
       await this.SQLiteServ.set('token', token);
-      await this.validaToken();
-    }
-  
-    public async cargarToken() {
-      this.token = await this.SQLiteServ.get('token') || null;
-    }
-  
-    public async validaToken(): Promise<boolean> {
-  
       await this.cargarToken();
-  
+    }
+
+    public async cargarToken() {
+      this.token = await this.SQLiteServ.get('token');
+    }
+
+    public async validaTokenNew(): Promise<boolean> {
+
+      this.token = await this.SQLiteServ.get('token');
+      console.log( this.token );
+
       if ( !this.token ) {
         await this.SQLiteServ.set('token', '');
         await this.SQLiteServ.set('user', null);
@@ -56,32 +59,48 @@ export class AuthService {
         return Promise.resolve(true);
       }
     }
-  
-    public async validaSesion() {
-      await this.validaToken();
+
+    public async validaSesion( ruta: string ) {
+
+      setTimeout(() => {
+        this.validaTokenNew().then(
+          resp => {
+            if( resp && ruta ) {
+              this.navCtrl.navigateRoot( ruta, { animated: true } );
+            }
+          }
+        )
+      }, 500);
+
     }
-  
+
     public async getIdSession(): Promise<number> {
       let user = await this.SQLiteServ.get('user');
-  
+
       if(user != null || user != undefined)
         return Promise.resolve(user.idUser);
       else
         return Promise.resolve(0);
     }
-  
+
+    public async getUser(): Promise<any> {
+      let user = await this.SQLiteServ.get('user');
+
+      return Promise.resolve(user);
+    }
+
     public async cerrarSesion() {
       this.token = '';
       await this.SQLiteServ.clear();
       this.navCtrl.navigateRoot('/login', { animated: true });
     }
-  
+
     public CGetMenu(idUser: number): Observable<ResponseGet>{
       const data = {
         idUser: idUser
       };
-  
+
       return this.http.post<ResponseGet>(`${ this.baseURL }/${ this._api }/CGetMenu`,data);
     }
-    
+
 }

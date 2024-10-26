@@ -12,7 +12,7 @@ export class FletesService {
 
   private baseURL: string = environment.baseUrl;
 
-  _api: string = 'api/products';
+  _api: string = 'api/fletes';
 
   constructor(
     private http: HttpClient
@@ -45,5 +45,29 @@ export class FletesService {
     }
     return this.http.post<ResponseGet>( `${ this.baseURL }/${ this._api }/getFleteByID`, data);
   }
+
+  CSaveCargaRepato( data : any ): Observable<ResponseDB_CRUD> {
+    data.idUserLogON = this.authServ.getIdUserSession();
+    return this.http.post<ResponseDB_CRUD>( `${ this.baseURL }/${ this._api }/save_cargas_repartos`, data );
+  }
+
+  CGetCargasDescargas( id: number ): Observable<ResponseGet> {
+    var data = {
+      idFlete: id
+    }
+    return this.http.post<ResponseGet>( `${ this.baseURL }/${ this._api }/getCargasDescargas`, data);
+  }
+
+  CInsertFolio(data: any): Observable<ResponseDB_CRUD>{
+    data.idUserLogON = this.authServ.getIdUserSession();
+    return this.http.post<ResponseDB_CRUD>(`${ this.baseURL }/${ this._api }/app_insertFolio`,data);
+  }
+
+  CDeleteFolio( data : any ): Observable<ResponseDB_CRUD> {
+    data.idUserLogON = this.authServ.getIdUserSession();
+    return this.http.post<ResponseDB_CRUD>( `${ this.baseURL }/${ this._api }/deleteFolio`, data );
+  }
+
   
+
 }
