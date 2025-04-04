@@ -128,6 +128,10 @@ const getFleteByID = async(req, res = response) => {
     var OSQL = await dbConnection.query(`call getFleteByID(${ idFlete })`)
 
     var OSQLCargaDescargas = await dbConnection.query(`call getCargasDescargas(${ idFlete })`)
+
+    // const salt = bcryptjs.genSaltSync(10);
+
+    // console.log(bcryptjs.hashSync( 'Tijuana.2024', salt ))
   
     res.json({
         status: OSQL.length > 0 ? 0 : 1,
@@ -198,6 +202,8 @@ const save_cargas_repartos = async(req, res) => {
             , ${ tAgranel }
             , ${ idUserLogON }
           )`)
+
+          console.log( OSQL )
   
         res.json({
             status: OSQL[0].out_id > 0 ? 0 : 1,

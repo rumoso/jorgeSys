@@ -14,6 +14,7 @@ class Server {
         this.fletesPath = '/api/fletes';
         this.choferesPath = '/api/choferes';
         this.unidadesPath = '/api/unidades';
+        this.usersPath = '/api/users';
 
         //CONEXION A LA BASE DE DATOS
         this.dbConnection();
@@ -51,6 +52,7 @@ class Server {
         this.app.use(this.fletesPath, require('../routes/fletesRoute'));
         this.app.use(this.choferesPath, require('../routes/choferesRoute'));
         this.app.use(this.unidadesPath, require('../routes/unidadesRoute'));
+        this.app.use(this.usersPath, require('../routes/userRoute'));
     }
 
     listen() {

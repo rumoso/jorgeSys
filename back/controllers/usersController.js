@@ -13,7 +13,7 @@ const getUsersListWithPage = async(req, res = response) => {
         search = '', limiter = 10, start = 0
     } = req.body;
 
-    //console.log(req.body)
+    console.log(req.body)
 
     try{
 

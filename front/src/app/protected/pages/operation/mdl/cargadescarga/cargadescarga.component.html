@@ -65,7 +65,11 @@
                     <div class="col-md-2">
                           <mat-form-field appearance="fill">
                             <mat-label>Hora de cita</mat-label>
-                            <input matInput placeholder="hh:mm:ss" [(ngModel)]="cargaForm.horaCita">
+                            <input matInput
+                            placeholder="hh:mm:ss"
+                            [(ngModel)]="cargaForm.horaCita"
+                            (input)="aplicarMascara($event)"
+                            maxlength="8">
                           </mat-form-field>
                     </div>
 

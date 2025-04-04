@@ -102,6 +102,44 @@ export class CargadescargaComponent {
   }
 
 // #region MÉTODOS PARA FRONT
+
+aplicarMascara(event: any): void {
+  let valor = event.target.value.replace(/[^0-9]/g, ''); // Solo permite números
+  
+  // Aplicar el formato hh:mm:ss
+  if (valor.length >= 2) {
+    valor = valor.slice(0, 2) + ':' + valor.slice(2);
+  }
+  if (valor.length >= 5) {
+    valor = valor.slice(0, 5) + ':' + valor.slice(5, 7);
+  }
+  if (valor.length > 8) {
+    valor = valor.slice(0, 8);
+  }
+
+  // Validar cada parte del formato para evitar valores incorrectos
+  const partes = valor.split(':');
+  const horas = parseInt(partes[0], 10);
+  const minutos = parseInt(partes[1], 10);
+  const segundos = parseInt(partes[2], 10);
+
+  if (horas > 23 || minutos > 59 || segundos > 59) {
+    return; // Evita actualizar el valor si es inválido
+  }
+
+  this.cargaForm.horaCita = valor;
+}
+
+isHoraValida(hora: string): boolean {
+  const regex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+  return regex.test(hora);
+}
+
+verificarHoraValida(): void {
+  if (!this.isHoraValida(this.cargaForm.horaCita)) {
+    alert('El formato de la hora es incorrecto. Debe ser hh:mm:ss con valores válidos.');
+  }
+}
   
   fn_CerrarMDL( id: number ){
     this.dialogRef.close( id );
@@ -133,6 +171,8 @@ export class CargadescargaComponent {
                 this.servicesGServ.showAlertIA( resp );
                 
                 this.bShowSpinner = false;
+
+                this.fn_CerrarMDL( 0 );
       
               },
               error: (ex) => {

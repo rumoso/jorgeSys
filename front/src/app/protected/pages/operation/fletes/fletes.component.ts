@@ -249,6 +249,7 @@ export class FletesComponent {
       
                 if( resp.status === 0 ){
                   this.idFlete = resp.insertID;
+                  this.fleteForm.idFlete = resp.insertID;
                 }
     
                 this.servicesGServ.showAlertIA( resp );
