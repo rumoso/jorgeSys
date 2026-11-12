@@ -24,11 +24,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 
-import { CurrencyMaskModule } from "ng2-currency-mask";
-
-import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
-
-
 
 
 
@@ -58,11 +53,7 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
     MatSidenavModule,
     MatSnackBarModule,
     MatToolbarModule,
-    MatTooltipModule,
-
-    CurrencyMaskModule,
-
-    NgxMaterialTimepickerModule
+    MatTooltipModule
   ]
 })
 export class MaterialModule { }

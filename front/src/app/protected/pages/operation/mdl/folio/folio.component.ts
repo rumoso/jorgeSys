@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from 'src/app/auth/services/auth.service';
@@ -8,9 +8,11 @@ import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-folio',
-  templateUrl: './folio.component.html',
-  styleUrls: ['./folio.component.css']
+    selector: 'app-folio',
+    templateUrl: './folio.component.html',
+    styleUrls: ['./folio.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class FolioComponent {
 

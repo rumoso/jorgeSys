@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from 'src/app/auth/services/auth.service';
@@ -9,9 +9,11 @@ import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-action-authorization',
-  templateUrl: './action-authorization.component.html',
-  styleUrls: ['./action-authorization.component.css']
+    selector: 'app-action-authorization',
+    templateUrl: './action-authorization.component.html',
+    styleUrls: ['./action-authorization.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ActionAuthorizationComponent {
 //////////////////////////////////////////////////////////////////////////////////////////////////

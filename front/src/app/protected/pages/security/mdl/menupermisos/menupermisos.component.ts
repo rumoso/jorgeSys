@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { ResponseGet } from 'src/app/interfaces/general.interfaces';
@@ -8,9 +8,11 @@ import { ActionsService } from 'src/app/protected/services/actions.service';
 import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 
 @Component({
-  selector: 'app-menupermisos',
-  templateUrl: './menupermisos.component.html',
-  styleUrls: ['./menupermisos.component.css']
+    selector: 'app-menupermisos',
+    templateUrl: './menupermisos.component.html',
+    styleUrls: ['./menupermisos.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class MenupermisosComponent {
   

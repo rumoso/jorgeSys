@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { Pagination, ResponseGet } from 'src/app/interfaces/general.interfaces';
@@ -8,9 +8,11 @@ import { ServicesGService } from 'src/app/servicesG/servicesG.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-fletes-list',
-  templateUrl: './fletes-list.component.html',
-  styleUrls: ['./fletes-list.component.css']
+    selector: 'app-fletes-list',
+    templateUrl: './fletes-list.component.html',
+    styleUrls: ['./fletes-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class FletesListComponent {
 

@@ -1,61 +1,65 @@
 <mat-sidenav-container fullscreen>
 
-    <mat-sidenav #sidenav mode="push">
-        <mat-toolbar >
-            <span>Menú</span>
+  <mat-sidenav #sidenav mode="push">
+    <mat-toolbar >
+      <span>Menú</span>
 
-            <span class="spacer"></span>
-            
-            <button mat-icon-button
-            (click)="sidenav.toggle()">
-                <mat-icon>menu</mat-icon>
-            </button>
-            
-        </mat-toolbar>
+      <span class="spacer"></span>
 
-        <mat-expansion-panel [class.mat-elevation-z0]="true" *ngFor="let menuDad of _menuList">
-            <mat-expansion-panel-header>
-                {{ menuDad.name }}
-            </mat-expansion-panel-header>
-            <mat-nav-list *ngFor="let subMenu of menuDad.subMenus">
-                <a mat-list-item (click)="changeRoute(subMenu.linkList)">
-                    <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="user"></mat-icon>
-<span>{{ subMenu.name }}</span>
-                </a>
-            </mat-nav-list>
-        </mat-expansion-panel>
-        
-    </mat-sidenav>
-
-    <mat-toolbar id="headerApp">
-        <button mat-icon-button
+      <button mat-icon-button
         (click)="sidenav.toggle()">
-            <mat-icon>menu</mat-icon>
-        </button>
+        <mat-icon>menu</mat-icon>
+      </button>
 
-        <img width="40"
-                class="manitaSobre"
-                src="assets/img/icons/truckIco.png"
-                alt=""
-                routerLink="./dashboard">
-        <h1 routerLink="./dashboard"
-            class="manitaSobre">{{ _appName }}</h1>
-        <span class="spacer"></span> 
+    </mat-toolbar>
 
-        <span class="spacer"></span>
-        <img class="imgDashboard" style="width:50px !important" src="assets/img/icons/connectUser.gif"/>
+    @for (menuDad of _menuList; track menuDad) {
+      <mat-expansion-panel [class.mat-elevation-z0]="true">
+        <mat-expansion-panel-header>
+          {{ menuDad.name }}
+        </mat-expansion-panel-header>
+        @for (subMenu of menuDad.subMenus; track subMenu) {
+          <mat-nav-list>
+            <a mat-list-item (click)="changeRoute(subMenu.linkList)">
+              <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="user"></mat-icon>
+              <span>{{ subMenu.name }}</span>
+            </a>
+          </mat-nav-list>
+        }
+      </mat-expansion-panel>
+    }
 
-        <span>{{ userLogin!.name }}</span>
+  </mat-sidenav>
 
-        <button mat-button
+  <mat-toolbar id="headerApp">
+    <button mat-icon-button
+      (click)="sidenav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <img width="40"
+      class="manitaSobre"
+      src="assets/img/icons/truckIco.png"
+      alt=""
+      routerLink="./dashboard">
+      <h1 routerLink="./dashboard"
+      class="manitaSobre">{{ _appName }}</h1>
+      <span class="spacer"></span>
+
+      <span class="spacer"></span>
+      <img class="imgDashboard" style="width:50px !important" src="assets/img/icons/connectUser.gif"/>
+
+      <span>{{ userLogin!.name }}</span>
+
+      <button mat-button
         (click)="logout()">
-            <mat-icon mat-list-icon>logout</mat-icon>
-            Logout
-        </button>
+        <mat-icon mat-list-icon>logout</mat-icon>
+        Logout
+      </button>
     </mat-toolbar>
 
     <div class="container" style="margin-bottom: 50px;">
-        <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
     </div>
-    
-</mat-sidenav-container>
+
+  </mat-sidenav-container>

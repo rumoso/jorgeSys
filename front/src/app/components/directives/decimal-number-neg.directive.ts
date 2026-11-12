@@ -1,7 +1,8 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
-  selector: '[appDecimalNumberNeg]'
+    selector: '[appDecimalNumberNeg]',
+    standalone: false
 })
 export class DecimalNumberNegDirective {
 

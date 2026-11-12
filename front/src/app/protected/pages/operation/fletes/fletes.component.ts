@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,9 +16,11 @@ import { CargadescargaComponent } from '../mdl/cargadescarga/cargadescarga.compo
 import { FolioComponent } from '../mdl/folio/folio.component';
 
 @Component({
-  selector: 'app-fletes',
-  templateUrl: './fletes.component.html',
-  styleUrls: ['./fletes.component.css']
+    selector: 'app-fletes',
+    templateUrl: './fletes.component.html',
+    styleUrls: ['./fletes.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class FletesComponent {
 
