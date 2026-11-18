@@ -1,0 +1,50 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ data.dispositivo ? 'Vincular ' + data.dispositivo.nombre : 'Agregar dispositivo' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+
+    @if (!codigo() && !vinculado()) {
+      <div class="inline-wrap">
+        <label class="slim-label" for="d-suc">Sucursal</label>
+        <select id="d-suc" class="inline-input" formControlName="idSucursal">
+          @for (s of sucursales(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+        </select>
+        <span class="inline-ayuda">El dispositivo checará siempre en esta sucursal. Para cambiarlo de sucursal se revoca y se vincula otro.</span>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="d-nombre">Nombre</label>
+        <input id="d-nombre" class="inline-input" formControlName="nombre" maxlength="80" placeholder="Entrada principal"
+               [class.invalido]="form.controls.nombre.touched && form.controls.nombre.invalid">
+      </div>
+    }
+
+    @if (vinculado()) {
+      <div class="dm-vinculado"><mat-icon>verified</mat-icon><b>Vinculado</b><span>El dispositivo ya está listo para checar.</span></div>
+    } @else if (codigo(); as c) {
+      <div class="dm-codigo">
+        <span class="slim-label">En el dispositivo abre <b>{{ '/checador' }}</b> y escanea el QR o escribe el código</span>
+        @if (restante() > 0) {
+          <div class="dm-grande" aria-label="Código de vinculación">{{ codigoVisible() }}</div>
+          @if (qr(); as q) { <img class="dm-qr" [src]="q" alt="QR con el código de vinculación"> }
+          <div class="dm-reloj"><mat-icon>timer</mat-icon> Vence en {{ reloj() }} · Esperando al dispositivo…</div>
+        } @else {
+          <div class="dm-vencido"><mat-icon>timer_off</mat-icon> El código venció.</div>
+        }
+        <button type="button" mat-stroked-button (click)="generarOtro()" [disabled]="guardando()"><mat-icon>refresh</mat-icon> Generar otro</button>
+      </div>
+    }
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (!idDispositivo()) { <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Guardar y ver código</button> }
+  </div>
+</div>

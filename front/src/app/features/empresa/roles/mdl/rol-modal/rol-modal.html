@@ -1,0 +1,63 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ idRol() ? (protegido ? 'Rol Administrador' : 'Rol ' + (data.rol?.nombre || form.getRawValue().nombre)) : 'Nuevo rol' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="rh-dialog-body">
+    @if (protegido) {
+      <div class="rh-banner info"><mat-icon>verified_user</mat-icon>
+        El Administrador siempre tiene todo lo que la empresa tiene contratado, también lo que se agregue después. No se edita ni se desactiva.</div>
+    }
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="rh-grid-2">
+      <div class="inline-wrap">
+        <label class="slim-label" for="r-nombre">Nombre</label>
+        <input id="r-nombre" class="inline-input" formControlName="nombre" maxlength="80"
+               [class.invalido]="form.controls.nombre.touched && form.controls.nombre.invalid">
+      </div>
+      @if (!idRol()) {
+        <div class="inline-wrap">
+          <label class="slim-label" for="r-copia">Crear a partir de</label>
+          <select id="r-copia" class="inline-input" formControlName="copiarDe">
+            <option [value]="0">Sin permisos (vacío)</option>
+            @for (r of data.roles; track r.idRol) { <option [value]="r.idRol">{{ r.nombre }}</option> }
+          </select>
+          <span class="inline-ayuda">Copia sus permisos; después se ajustan.</span>
+        </div>
+      }
+      <div class="inline-wrap" style="grid-column: 1 / -1">
+        <label class="slim-label" for="r-desc">Descripción (opcional)</label>
+        <input id="r-desc" class="inline-input" formControlName="descripcion" maxlength="250">
+      </div>
+      <button type="submit" hidden></button>
+    </form>
+
+    @if (idRol()) {
+      <div>
+        <div class="rh-card-title" style="margin-top: 4px">Permisos</div>
+        @if (bannerPermisos(); as b) {
+          <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+        }
+        @if (catalogo(); as c) {
+          <app-matriz-permisos [catalogo]="c.modulos" [marcados]="marcados()" [otorgables]="c.otorgables"
+                               [soloLectura]="!puedePermisos" (cambio)="cambioMatriz($event)" />
+        } @else { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+        @if (!protegido && !puedePermisos) {
+          <span class="inline-ayuda">Solo lectura: no tienes el permiso de asignar permisos a los roles.</span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (puedeGuardar) {
+      <button mat-flat-button (click)="guardar()" [disabled]="guardando()">{{ idRol() ? 'Guardar' : 'Crear rol' }}</button>
+    }
+  </div>
+</div>

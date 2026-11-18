@@ -1,0 +1,46 @@
+<div class="bh">
+  <form class="rh-filtros bh-filtros" [formGroup]="filtros" (ngSubmit)="buscar()">
+    <div class="inline-wrap">
+      <label class="slim-label" for="bh-desde">Desde</label>
+      <input id="bh-desde" class="inline-input" type="date" formControlName="desde">
+    </div>
+    <div class="inline-wrap">
+      <label class="slim-label" for="bh-hasta">Hasta</label>
+      <input id="bh-hasta" class="inline-input" type="date" formControlName="hasta">
+    </div>
+    <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Buscar</button>
+  </form>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  @if (error(); as e) { <div class="rh-banner bad"><mat-icon>error_outline</mat-icon>{{ e }}</div> }
+
+  @for (b of lista().slice(0, mostrar()); track b.idBitacora) {
+    <article class="bh-item">
+      <div class="bh-cabeza">
+        <mat-icon class="bh-icono">{{ tipos[b.tipo].icono }}</mat-icon>
+        <div class="bh-quien">
+          <strong>{{ tipos[b.tipo].texto }}</strong>
+          @if (b.fechaDia) { <span> · {{ b.fechaDia | fechaNegocio }}</span> }
+          @if (!idEmpleado() && b.empleado) { <span> · {{ b.empleado }}</span> }
+          <span class="rh-sub">{{ b.autor || 'Sistema' }} · {{ b.fecha | fechaSucursal: b.zonaHoraria }}</span>
+        </div>
+      </div>
+      @if (b.motivo) { <div class="bh-motivo">{{ b.motivo }}</div> }
+      @if (b.cambios.length) {
+        <dl class="bh-cambios">
+          @for (c of b.cambios; track $index) {
+            <dt>{{ c.etiqueta }}</dt>
+            <dd>
+              @if (c.antes) { <span class="bh-antes">{{ c.antes }}</span> <mat-icon class="bh-flecha">arrow_forward</mat-icon> }
+              <span>{{ c.despues }}</span>
+            </dd>
+          }
+        </dl>
+      }
+    </article>
+  } @empty {
+    @if (!cargando() && !error()) { <div class="rh-vacio"><mat-icon>history</mat-icon>Sin cambios registrados con ese filtro.</div> }
+  }
+  @if (lista().length > mostrar()) {
+    <button mat-button type="button" (click)="mas()">Mostrar más ({{ lista().length - mostrar() }})</button>
+  }
+</div>

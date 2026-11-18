@@ -1,0 +1,53 @@
+// Paletas del producto (2026-11-11). La paleta y el modo (claro, oscuro o
+// automático) son independientes: `data-paleta` cambia los colores de marca
+// y `color-scheme` (data-theme) decide cuál de los dos valores de cada
+// `light-dark()` aplica.
+//
+// Índigo es la de siempre y vive en `_tokens.scss`. Las demás solo pisan los
+// tokens de marca: los colores de estado (ok, warn, bad, info) no cambian,
+// porque significan algo y deben verse igual en todas.
+//
+// Para agregar una paleta: un bloque aquí, su Material en `styles.scss` y su
+// renglón en `PALETAS` (core/services/theme.service.ts).
+
+:root[data-paleta='esmeralda'] {
+  --rh-primary: light-dark(#0F6E56, #5DCAA5);
+  --rh-primary-strong: light-dark(#085041, #9FE1CB);
+  --rh-primary-bg: light-dark(#E1F5EE, #0F3A30);
+  --rh-side: light-dark(#04342C, #06241E);
+  --rh-side-text: #CDEFE2;
+  --rh-side-muted: #5DCAA5;
+  --rh-side-active: light-dark(#0F6E56, #085041);
+  --rh-bg: light-dark(#F3F7F5, #0C1311);
+  --rh-surface: light-dark(#FFFFFF, #141C19);
+  --rh-surface-2: light-dark(#EEF4F1, #1B2521);
+  --rh-border: light-dark(#DDE8E3, #25312C);
+}
+
+:root[data-paleta='oceano'] {
+  --rh-primary: light-dark(#185FA5, #85B7EB);
+  --rh-primary-strong: light-dark(#0C447C, #B5D4F4);
+  --rh-primary-bg: light-dark(#E6F1FB, #102C4A);
+  --rh-side: light-dark(#042C53, #071C33);
+  --rh-side-text: #D2E5F8;
+  --rh-side-muted: #6FA6DE;
+  --rh-side-active: light-dark(#185FA5, #0C447C);
+  --rh-bg: light-dark(#F3F6FA, #0C1118);
+  --rh-surface: light-dark(#FFFFFF, #141A23);
+  --rh-surface-2: light-dark(#EEF3F8, #1B222D);
+  --rh-border: light-dark(#DCE5EF, #252E3B);
+}
+
+:root[data-paleta='terracota'] {
+  --rh-primary: light-dark(#993C1D, #F0997B);
+  --rh-primary-strong: light-dark(#712B13, #F5C4B3);
+  --rh-primary-bg: light-dark(#FAECE7, #4A1B0C);
+  --rh-side: light-dark(#4A1B0C, #2E130A);
+  --rh-side-text: #F8DCD0;
+  --rh-side-muted: #E08A68;
+  --rh-side-active: light-dark(#993C1D, #712B13);
+  --rh-bg: light-dark(#FAF6F3, #140F0D);
+  --rh-surface: light-dark(#FFFFFF, #1D1714);
+  --rh-surface-2: light-dark(#F6EFEB, #261E1A);
+  --rh-border: light-dark(#EDE2DC, #352A25);
+}

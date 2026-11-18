@@ -1,0 +1,74 @@
+<div class="he">
+  @if (cargando() || guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  @if (banner(); as b) {
+    <div class="rh-banner" [class.ok]="b.tipo === 'ok'" [class.bad]="b.tipo === 'bad'" [class.info]="b.tipo === 'info'">
+      <mat-icon>{{ b.candado ? 'lock_clock' : b.tipo === 'ok' ? 'check_circle' : b.tipo === 'bad' ? 'error_outline' : 'info' }}</mat-icon>{{ b.texto }}
+    </div>
+  }
+  @for (a of avisosGuardado(); track $index) {
+    <div class="rh-banner he-warn"><mat-icon>warning</mat-icon>{{ a.mensaje }}</div>
+  }
+  @if (conservados().length) {
+    <div class="rh-banner info"><mat-icon>edit_calendar</mat-icon>
+      <div>
+        <div>Estos días estaban cambiados a mano y se conservaron (no los tocó el horario nuevo):</div>
+        @for (c of conservados(); track c.fecha) {
+          <div>{{ c.fecha | fechaNegocio }}: {{ turno(c) }}@if (c.motivo) { — {{ c.motivo }} }</div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (datos(); as d) {
+    <div class="he-estado">
+      <span>Sucursal principal: <strong>{{ d.sucursalPrincipal }}</strong></span>
+      @if (d.bSinHorario) { <span class="rh-chip bad">Sin horario</span> }
+      @else if (d.bIgualPlantilla) { <span class="rh-chip ok">Igual a la plantilla de su sucursal</span> }
+      @else if (d.bPlantillaDefinida) { <span class="rh-chip info">Horario propio</span> }
+    </div>
+    @if (d.estado === 'BAJA') {
+      <div class="rh-banner info"><mat-icon>lock</mat-icon>Está dado de baja: su horario no se cambia.</div>
+    } @else if (!puedeEditar) {
+      <div class="rh-banner info"><mat-icon>lock</mat-icon>Solo consulta: no tienes el permiso para cambiar horarios.</div>
+    }
+
+    <div class="rh-card-title he-titulo">Horario semanal</div>
+    @if (cargadaSinGuardar(); as m) { <div class="rh-banner he-warn"><mat-icon>pending_actions</mat-icon>{{ m }}</div> }
+    <app-horario-semanal [horario]="base()" [soloLectura]="!editable()" />
+
+    @if (editable()) {
+      <form class="he-guardar" [formGroup]="form" (ngSubmit)="guardar()">
+        <div class="inline-wrap">
+          <label class="slim-label" for="he-apd">A partir de</label>
+          <input id="he-apd" class="inline-input" type="date" formControlName="aPartirDe" [min]="puedeRetroactivo ? null : d.hoy">
+        </div>
+        <div class="inline-wrap he-ancho">
+          <label class="slim-label" for="he-mot">Motivo (opcional)</label>
+          <input id="he-mot" class="inline-input" formControlName="motivo" maxlength="250">
+        </div>
+        <div class="he-botones">
+          <button mat-stroked-button type="button" (click)="cargarPlantilla()"><mat-icon>content_copy</mat-icon> Cargar la plantilla de su sucursal</button>
+          <button mat-flat-button type="submit" [disabled]="guardando()"><mat-icon>save</mat-icon> Guardar horario</button>
+        </div>
+      </form>
+      <span class="inline-ayuda">Los días se regeneran desde esa fecha; los anteriores y los cambiados a mano no se tocan.
+        @if (!puedeRetroactivo) { Una fecha pasada exige el permiso "Cambiar horarios y días de fechas pasadas". }</span>
+    }
+
+    <div class="rh-seccion">
+      <div class="rh-card-title">Calendario</div>
+      <app-calendario-empleado [idEmpleado]="d.idEmpleado" [nombreCompleto]="d.nombreCompleto" [hoy]="d.hoy"
+                               [horario]="d" [version]="version()" (cambio)="diaCambiado()" />
+    </div>
+
+    <div class="rh-seccion">
+      <div class="he-hist">
+        <div class="rh-card-title">Historial</div>
+        <button mat-button type="button" (click)="verHistorial.set(!verHistorial())">
+          <mat-icon>{{ verHistorial() ? 'expand_less' : 'history' }}</mat-icon> {{ verHistorial() ? 'Ocultar' : 'Ver historial' }}
+        </button>
+      </div>
+      @if (verHistorial()) { <app-bitacora-horarios [idEmpleado]="d.idEmpleado" [version]="version()" /> }
+    </div>
+  }
+</div>

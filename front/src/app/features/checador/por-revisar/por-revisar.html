@@ -1,0 +1,76 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Por revisar</h1>
+      <p>Marcajes que el checador no pudo confirmar solo. Apruébalos o recházalos con motivo; un rechazo no se borra: queda anulado y visible.</p>
+    </div>
+  </div>
+
+  <div class="rh-card">
+    <div class="rh-filtros">
+      <div class="inline-wrap">
+        <label class="slim-label" for="pr-suc">Sucursal</label>
+        <select id="pr-suc" class="inline-input" [formControl]="sucursal">
+          <option [ngValue]="null">Todas mis sucursales</option>
+          @for (s of auth.sucursales(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+        </select>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="pr-estado">Mostrar</label>
+        <select id="pr-estado" class="inline-input" [formControl]="estado">
+          <option value="pendientes">Pendientes</option>
+          <option value="revisados">Ya revisados</option>
+        </select>
+      </div>
+      <button mat-stroked-button (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
+    </div>
+
+    @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div class="pr-grid">
+      @for (m of lista(); track m.idMarcaje) {
+        <div class="pr-item">
+          <div class="pr-foto">
+            @if (fotos()[m.idMarcaje]; as url) {
+              <img [src]="url" [alt]="'Foto al checar de ' + m.empleado">
+            } @else {
+              <mat-icon>{{ m.tieneFoto ? 'hourglass_empty' : 'no_photography' }}</mat-icon>
+              @if (!m.tieneFoto) { <small>Sin foto (venció)</small> }
+            }
+          </div>
+          <div class="pr-datos">
+            <b>{{ m.empleado }}</b>
+            <span class="rh-sub">No. {{ m.numeroEmpleado }} · {{ m.sucursal }}</span>
+            <span class="pr-hora"><mat-icon class="rh-inline-icon">schedule</mat-icon>
+              {{ m.instante | fechaSucursal: m.zonaHoraria : 'fechaHora' : zonasMixtas() }}</span>
+            <span class="rh-sub"><mat-icon class="rh-inline-icon">{{ m.formaIcono }}</mat-icon> {{ m.formaNombre }}@if (m.dispositivo) { · {{ m.dispositivo }} }</span>
+            @if (m.faceid) {
+              <span class="rh-sub">{{ textoFaceid(m) }}@if (m.faceid.similitud !== null) { · parecido {{ porcentaje(m.faceid.similitud) }} }</span>
+              @for (c of m.faceid.candidatos; track $index) {
+                <span class="rh-sub">· Se parecía a {{ c.nombre || 'otro empleado' }} ({{ c.numeroEmpleado || '—' }}): {{ porcentaje(c.similitud) }}</span>
+              }
+            }
+            @if (m.numeroEscrito) { <span class="rh-sub">Número escrito: <b>{{ m.numeroEscrito }}</b></span> }
+            @if (m.motivoDuda) { <div class="rh-banner info pr-motivo"><mat-icon>help_outline</mat-icon>{{ m.motivoDuda }}</div> }
+            @if (m.decisionRevision) {
+              <span class="rh-chip" [class.ok]="m.decisionRevision === 'APROBADO'" [class.bad]="m.decisionRevision === 'RECHAZADO'">
+                {{ m.decisionRevision === 'APROBADO' ? 'Aprobado' : 'Rechazado · anulado' }}
+              </span>
+              <span class="rh-sub">{{ m.revisadoPor }} · {{ m.fechaRevision | fechaSucursal: m.zonaHoraria }}@if (m.motivoRevision) { · {{ m.motivoRevision }} }</span>
+            }
+          </div>
+          @if (!m.decisionRevision && puedeRevisar) {
+            <div class="pr-acciones">
+              <button mat-stroked-button (click)="rechazar(m)" [disabled]="ocupado() === m.idMarcaje"><mat-icon>close</mat-icon> Rechazar</button>
+              <button mat-flat-button (click)="aprobar(m)" [disabled]="ocupado() === m.idMarcaje"><mat-icon>check</mat-icon> Aprobar</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (!cargando() && !lista().length) {
+      <div class="rh-vacio"><mat-icon>fact_check</mat-icon>{{ estado.value === 'pendientes' ? 'No hay marcajes por revisar.' : 'No hay marcajes revisados con ese filtro.' }}</div>
+    }
+  </div>
+</div>

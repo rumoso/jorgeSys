@@ -1,0 +1,32 @@
+<div class="mp">
+  @for (mo of catalogo(); track mo.modulo) {
+    <details class="mp-modulo" open>
+      <summary><mat-icon class="mp-flecha">expand_more</mat-icon><b>{{ mo.nombre }}</b><span class="mp-total">{{ totales()[mo.modulo] }}</span></summary>
+      @for (m of mo.menus; track m.menu) {
+        <div class="mp-menu">
+          <label class="mp-check mp-check--menu" [class.off]="!puedeMenu(m.menu) && !menuHeredado(m.menu)"
+                 [matTooltip]="puedeMenu(m.menu) || soloLectura() || menuHeredado(m.menu) ? '' : 'No puedes otorgar ni quitar lo que tú no tienes'">
+            <input type="checkbox" [checked]="menus().has(m.menu) || menuHeredado(m.menu)" [disabled]="!puedeMenu(m.menu)"
+                   (change)="alternarMenu(m.menu, accionesDe(m.acciones), $any($event.target).checked)">
+            <mat-icon>{{ m.icono }}</mat-icon>{{ m.titulo }}
+            @if (menuHeredado(m.menu)) { <span class="mp-rol">por su rol</span> }
+          </label>
+          @if (m.acciones.length) {
+            <div class="mp-acciones">
+              @for (a of m.acciones; track a.accion) {
+                <label class="mp-check" [class.off]="!puedeAccion(a.accion) && !accionHeredada(a.accion)"
+                       [matTooltip]="puedeAccion(a.accion) || soloLectura() || accionHeredada(a.accion) ? '' : 'No puedes otorgar ni quitar lo que tú no tienes'">
+                  <input type="checkbox" [checked]="acciones().has(a.accion) || accionHeredada(a.accion)" [disabled]="!puedeAccion(a.accion)"
+                         (change)="alternarAccion(m.menu, a.accion, $any($event.target).checked)">
+                  {{ a.etiqueta }}
+                  @if (accionHeredada(a.accion)) { <span class="mp-rol">por su rol</span> }
+                </label>
+              }
+            </div>
+          }
+        </div>
+      }
+    </details>
+  }
+  @if (!catalogo().length) { <div class="rh-vacio">La empresa no tiene módulos contratados.</div> }
+</div>

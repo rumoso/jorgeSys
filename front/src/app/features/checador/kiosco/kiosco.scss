@@ -1,0 +1,57 @@
+:host { display: block; }
+.k { position: relative; min-height: 100dvh; display: flex; flex-direction: column; background: var(--rh-bg); color: var(--rh-text);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+
+// Vincular
+.k-vincular { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px;
+  text-align: center; max-width: 560px; margin: 0 auto;
+  h1 { margin: 0; font-size: clamp(22px, 5vw, 32px); }
+  p { margin: 0; color: var(--rh-text-2); font-size: 15px; line-height: 1.45; } }
+.k-logo { font-size: 64px; width: 64px; height: 64px; color: var(--rh-primary); }
+.k-msj { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--rh-bad-bg); color: var(--rh-bad);
+  font-size: 15px; &.ok { background: var(--rh-ok-bg); color: var(--rh-ok); } }
+.k-qr { width: min(90vw, 420px); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--rh-side); }
+.k-sub { font-size: 14px; }
+.k-o { color: var(--rh-text-3); }
+.k-codigo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+.k-input { flex: 1 1 220px; max-width: 320px; height: 56px; font-size: 28px; letter-spacing: 4px; text-align: center; font-weight: 600;
+  border: 2px solid var(--rh-border); border-radius: 12px; background: var(--rh-surface); color: var(--rh-text); text-transform: uppercase;
+  &:focus { outline: none; border-color: var(--rh-primary); } }
+.k-btn { height: 56px; font-size: 18px; padding: 0 22px; }
+
+// Checador
+.k-top { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--rh-side); color: var(--rh-side-text); }
+.k-donde { flex: 1; min-width: 0; display: flex; flex-direction: column;
+  b { font-size: clamp(16px, 3vw, 22px); } span { font-size: 12.5px; color: var(--rh-side-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+.k-hora { font-size: clamp(26px, 6vw, 44px); font-weight: 600; font-variant-numeric: tabular-nums; }
+.k-pc { color: var(--rh-side-text); }
+.k-banner { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; font-size: 16px; font-weight: 500;
+  &.bad { background: var(--rh-bad-bg); color: var(--rh-bad); } }
+.k-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 14px 12px; }
+.k-numero { height: 52px; font-size: 17px; }
+.k-sincamara { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 560px; text-align: left;
+  > mat-icon { font-size: 72px; width: 72px; height: 72px; color: var(--rh-bad); }
+  h2 { margin: 0; font-size: clamp(22px, 4.5vw, 30px); text-align: center; }
+  ol { font-size: 17px; line-height: 1.6; margin: 0; padding-left: 22px; } }
+
+// Respuesta grande
+.k-aviso { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 24px; text-align: center; z-index: 5; animation: k-entra .15s ease-out;
+  > mat-icon { font-size: clamp(90px, 22vw, 160px); width: clamp(90px, 22vw, 160px); height: clamp(90px, 22vw, 160px); }
+  &.ok { background: var(--rh-ok-bg); color: var(--rh-ok); }
+  &.warn { background: var(--rh-warn-bg); color: var(--rh-warn); }
+  &.bad { background: var(--rh-bad-bg); color: var(--rh-bad); } }
+.k-aviso-titulo { font-size: clamp(30px, 7vw, 56px); font-weight: 700; line-height: 1.1; }
+.k-aviso-detalle { font-size: clamp(20px, 4.5vw, 34px); font-weight: 500; }
+
+// Teclado del número de empleado
+.k-teclado { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  padding: 16px; background: var(--rh-surface);
+  h2 { margin: 0; font-size: clamp(22px, 5vw, 32px); text-align: center; } }
+.k-teclas { display: grid; grid-template-columns: repeat(3, minmax(72px, 110px)); gap: 10px; }
+.k-tecla { height: clamp(58px, 10vh, 84px); font-size: 30px; font-weight: 600; border-radius: 14px; border: 1px solid var(--rh-border);
+  background: var(--rh-surface-2); color: var(--rh-text); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  &:active { background: var(--rh-primary-bg); }
+  &.ok { background: var(--rh-primary); color: var(--rh-surface); border-color: var(--rh-primary); mat-icon { font-size: 34px; width: 34px; height: 34px; } }
+  &:disabled { opacity: .5; } }
+@keyframes k-entra { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: none; } }

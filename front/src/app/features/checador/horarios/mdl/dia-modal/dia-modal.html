@@ -1,0 +1,157 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ puedeCambiar ? 'Cambiar un día' : 'Día programado' }}
+      <span class="rh-sub">
+        @if (data.empleado; as e) { {{ e.nombreCompleto }} · }
+        @if (data.varios; as v) { {{ v.empleados.length }} empleado(s) de {{ v.sucursal }} · }
+        {{ data.fecha | fechaNegocio }}
+      </span>
+    </h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.tipo === 'ok'" [class.bad]="b.tipo === 'bad'" [class.info]="b.tipo === 'info'">
+        <mat-icon>{{ b.candado ? 'lock_clock' : b.tipo === 'ok' ? 'check_circle' : b.tipo === 'bad' ? 'error_outline' : 'info' }}</mat-icon>{{ b.texto }}
+      </div>
+    }
+    @for (a of avisos(); track $index) {
+      <div class="rh-banner dm-warn"><mat-icon>warning</mat-icon>{{ a.mensaje }}</div>
+    }
+    @if (!puedeCambiar) {
+      <div class="rh-banner info"><mat-icon>lock</mat-icon>Solo consulta: no tienes el permiso para cambiar días.</div>
+    }
+
+    <!-- Cómo está programado -->
+    @if (dia(); as d) {
+      <div class="dm-actual">
+        <span class="slim-label">Como está programado</span>
+        <div>
+          <strong>{{ turno(d) }}</strong>
+          @if (d.estado === 'LABORABLE') { · {{ horas(d.horas) }} @if (d.tipoJornada) { · {{ jornada[d.tipoJornada] }} } }
+          · {{ d.sucursal }}
+        </div>
+        <div class="dm-chips">
+          @if (d.bManual) { <span class="rh-chip warn"><mat-icon class="dm-mini">edit</mat-icon>Cambiado a mano</span> }
+          @if (d.idSucursalCobertura) { <span class="rh-chip info">Cubre en {{ d.sucursalCobertura }} desde {{ d.horaCobertura }}</span> }
+        </div>
+        @if (d.bManual && d.motivo) { <span class="inline-ayuda">Motivo: {{ d.motivo }}</span> }
+      </div>
+    }
+    @if (data.varios; as v) {
+      <div class="dm-actual">
+        <span class="slim-label">Empleados</span>
+        <ul class="dm-lista">
+          @for (x of v.empleados; track x.idEmpleado) {
+            <li><span>{{ x.nombreCompleto }}</span><span class="dm-tenue">{{ turno(x) }} · {{ horas(x.horas) }}@if (x.bManual) { · a mano }</span></li>
+          }
+        </ul>
+        <span class="inline-ayuda">Se aplica el mismo cambio a todos. La sucursal del día de cada uno no cambia.</span>
+      </div>
+    }
+
+    <!-- El cambio -->
+    <div class="dm-opciones" role="radiogroup" aria-label="Tipo de día">
+      <label class="rh-check"><input type="radio" formControlName="estado" value="LABORABLE"> Laborable</label>
+      <label class="rh-check"><input type="radio" formControlName="estado" value="DESCANSO"> Descanso</label>
+    </div>
+
+    @if (laborable()) {
+      <div class="rh-grid-2 dm-grid">
+        <div class="inline-wrap">
+          <label class="slim-label" for="dm-en">Entrada</label>
+          <input id="dm-en" class="inline-input" type="time" formControlName="entrada">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="dm-sa">Salida</label>
+          <input id="dm-sa" class="inline-input" type="time" formControlName="salida">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="dm-co">Comida (min)</label>
+          <input id="dm-co" class="inline-input" type="number" min="0" step="5" inputmode="numeric" formControlName="comidaMinutos">
+        </div>
+        <label class="rh-check dm-dentro"><input type="checkbox" formControlName="bComidaDentro"> La comida cuenta dentro de la jornada</label>
+      </div>
+    }
+
+    @if (data.empleado) {
+      <div class="inline-wrap">
+        <label class="slim-label" for="dm-suc">Sucursal del día</label>
+        <select id="dm-suc" class="inline-input" formControlName="idSucursal">
+          @for (s of opcionesDia(); track s.id) { <option [ngValue]="s.id">{{ s.nombre }}</option> }
+        </select>
+        <span class="inline-ayuda">
+          @if (cubre()) { En una cobertura la sucursal del día sigue siendo la de la entrada (tolerancia y festivos). }
+          @else { De ella salen la tolerancia de retardo y los festivos de ese día. }
+        </span>
+      </div>
+    }
+
+    <!-- Cobertura -->
+    @if (laborable()) {
+      <div class="rh-seccion dm-cobertura">
+        <label class="rh-check"><input type="checkbox" formControlName="cubre"> Cubre en otra sucursal</label>
+        @if (cubre()) {
+          <div class="rh-grid-2 dm-grid">
+            <div class="inline-wrap">
+              <label class="slim-label" for="dm-sc">Sucursal que cubre</label>
+              <select id="dm-sc" class="inline-input" formControlName="idSucursalCobertura" (change)="cambioCobertura()">
+                <option [ngValue]="0">Escoge…</option>
+                @for (s of opcionesCobertura(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+              </select>
+            </div>
+            <div class="inline-wrap">
+              <label class="slim-label" for="dm-hc">Desde qué hora</label>
+              <input id="dm-hc" class="inline-input" type="time" formControlName="horaCobertura">
+            </div>
+          </div>
+          @if (puedeCambiar) {
+            <div>
+              <button mat-stroked-button type="button" (click)="tomarSalida()" [disabled]="!form.controls.idSucursalCobertura.value">
+                <mat-icon>schedule</mat-icon> Tomar la salida de la plantilla de esa sucursal
+              </button>
+            </div>
+          }
+          <span class="inline-ayuda">El día no se parte: la salida se puede ajustar a mano y las horas se calculan con ella.</span>
+        }
+      </div>
+    }
+
+    <!-- Horas -->
+    <div class="dm-horas">
+      <div><span class="slim-label">Horas nuevas</span>
+        @if (laborable()) {
+          @if (nuevo(); as n) {
+            <strong>{{ horas(n.horas) }}</strong> · {{ jornada[n.tipoJornada] }} @if (n.bCruzaMedianoche) { · sale al día siguiente }
+          } @else { <span class="dm-tenue">Escribe la entrada y la salida</span> }
+        } @else { <strong>0 h</strong> · descanso }
+      </div>
+      @if (data.empleado) {
+        <div><span class="slim-label">De su horario</span><strong>{{ horas(horasHorario()) }}</strong></div>
+      }
+    </div>
+    @if (nuevo(); as n) {
+      @if (laborable() && n.horas > n.maximoDiario) {
+        <div class="rh-banner dm-warn"><mat-icon>warning</mat-icon>{{ n.horas }} h pasan del máximo de {{ n.maximoDiario }} h de la jornada {{ jornada[n.tipoJornada].toLowerCase() }}. Se puede guardar; queda el aviso.</div>
+      }
+    }
+
+    <div class="inline-wrap">
+      <label class="slim-label" for="dm-mo">Motivo</label>
+      <input id="dm-mo" class="inline-input" formControlName="motivo" maxlength="250" placeholder="Cambio de turno por inventario">
+      <span class="inline-ayuda">Obligatorio. También se pide para regresar el día a su horario.</span>
+    </div>
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    @if (puedeCambiar && dia()?.bManual) {
+      <button mat-stroked-button (click)="regresar()" [disabled]="guardando()"><mat-icon>undo</mat-icon> Regresar al horario</button>
+    }
+    <span class="rh-espacio"></span>
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (puedeCambiar) { <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Guardar</button> }
+  </div>
+</div>

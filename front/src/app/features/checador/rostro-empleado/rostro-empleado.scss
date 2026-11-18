@@ -1,0 +1,11 @@
+.re { display: flex; flex-direction: column; gap: 14px; }
+.re-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.re-seccion { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--rh-border); padding-top: 12px; }
+.re-texto { white-space: pre-wrap; font-size: 13px; line-height: 1.5; padding: 10px 12px; border-radius: 8px;
+  background: var(--rh-surface-2); border: 1px solid var(--rh-border); max-height: 220px; overflow: auto; }
+.re-botones { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; &.izq { justify-content: flex-start; } }
+.re-peligro { color: var(--rh-bad); }
+.re-parecidos { margin: 0; padding-left: 20px; font-size: 13px; }
+.re-forma { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  .inline-input { flex: 1 1 200px; max-width: 320px; } }
+.re-forma-nombre { flex: 1 1 140px; font-size: 13.5px; }

@@ -1,0 +1,12 @@
+.em-botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.rh-filtros .em-busqueda { width: 220px; }
+.em-persona { display: inline-flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: inherit;
+  font: inherit; text-align: left; cursor: pointer; }
+.em-persona:hover .em-nombre { color: var(--rh-primary); text-decoration: underline; }
+.em-nombre { font-weight: 500; }
+.rh-chip { margin-top: 2px; }
+.mat-mdc-paginator { background: transparent; }
+
+@media (max-width: 768px) {
+  .rh-filtros .em-busqueda { width: auto; flex: 1 1 100%; }
+}

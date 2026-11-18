@@ -1,0 +1,68 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>{{ tipo.titulo }}</h1>
+      <p>{{ tipo.descripcion }}</p>
+    </div>
+    @if (global.tienePermiso(tipo.accionEditar)) {
+      <button mat-flat-button (click)="abrir()"><mat-icon>add</mat-icon> Nuevo {{ tipo.singular }}</button>
+    }
+  </div>
+
+  <div class="rh-card">
+    <div class="rh-filtros">
+      <div class="inline-wrap">
+        <label class="slim-label" for="cs-estado">Mostrar</label>
+        <select id="cs-estado" class="inline-input" [formControl]="estado">
+          <option value="activos">Activos</option>
+          <option value="todos">Todos</option>
+        </select>
+      </div>
+      <button mat-stroked-button (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
+      <span class="rh-espacio"></span>
+      <button mat-icon-button (click)="vl.alternar()" [matTooltip]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+        <mat-icon>{{ vl.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+      </button>
+    </div>
+
+    @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div [class.vista-cards]="vl.vista() === 'cards'">
+      <table mat-table appTablaTarjetas [dataSource]="lista()">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let x">{{ x.nombre }}</td>
+        </ng-container>
+        <ng-container matColumnDef="empleados">
+          <th mat-header-cell *matHeaderCellDef>Empleados activos</th>
+          <td mat-cell *matCellDef="let x">{{ x.empleados }}</td>
+        </ng-container>
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let x"><span class="rh-chip" [class.ok]="x.bActivo" [class.bad]="!x.bActivo">{{ x.bActivo ? 'Activo' : 'Inactivo' }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let x" class="col-acciones">
+            @if (global.tienePermiso(tipo.accionEditar)) {
+              <button mat-icon-button matTooltip="Editar" (click)="abrir(x)"><mat-icon>edit</mat-icon></button>
+            } @else {
+              <button mat-icon-button matTooltip="Ver" (click)="abrir(x)"><mat-icon>visibility</mat-icon></button>
+            }
+            @if (global.tienePermiso(tipo.accionEstado)) {
+              <button mat-icon-button [matTooltip]="x.bActivo ? 'Desactivar' : 'Activar'" (click)="cambiarEstado(x)">
+                <mat-icon>{{ x.bActivo ? 'block' : 'check_circle' }}</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+      </table>
+    </div>
+
+    @if (!cargando() && !lista().length) {
+      <div class="rh-vacio"><mat-icon>{{ tipo.icono }}</mat-icon>No hay {{ tipo.titulo.toLowerCase() }} con ese filtro.</div>
+    }
+  </div>
+</div>

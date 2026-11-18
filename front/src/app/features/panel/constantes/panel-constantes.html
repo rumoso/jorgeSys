@@ -1,0 +1,79 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Constantes</h1>
+      <p>Valores técnicos del producto. El valor de una empresa manda sobre el global. Todo cambio aplica de inmediato y queda en la bitácora.</p>
+    </div>
+    <button mat-flat-button (click)="editar()"><mat-icon>add</mat-icon> Nueva constante</button>
+  </div>
+
+  <div class="rh-card pk-filtros">
+    <form class="rh-filtros" [formGroup]="filtros" (ngSubmit)="buscar()">
+      <div class="inline-wrap pn-busqueda">
+        <label class="slim-label" for="pk-q">Buscar</label>
+        <input id="pk-q" class="inline-input" formControlName="q" placeholder="Clave o etiqueta" autocomplete="off">
+      </div>
+      <label class="rh-check"><input type="checkbox" formControlName="inactivas"> Incluir desactivadas</label>
+      <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Buscar</button>
+    </form>
+  </div>
+
+  @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  @for (g of grupos(); track g.grupo) {
+    <details class="rh-card pk-grupo" open>
+      <summary class="pk-grupo-titulo">
+        <mat-icon class="pk-flecha">expand_more</mat-icon>{{ g.grupo }}
+        <span class="rh-sub pk-cuenta">{{ g.constantes.length }} constante{{ g.constantes.length === 1 ? '' : 's' }}</span>
+      </summary>
+
+      @for (c of g.constantes; track c.clave) {
+        <div class="pk-fila" [class.pk-cambiado]="cambiado(c)" [class.pk-inactiva]="!c.bActivo">
+          <div class="pk-texto">
+            <label class="pk-etiqueta" [for]="'pk-' + c.clave">{{ c.etiqueta }}</label>
+            <span class="pn-clave">{{ c.clave }}</span>
+            @if (c.ayuda) { <p class="pk-ayuda">{{ c.ayuda }}</p> }
+            <div class="pk-marcas">
+              <span class="rh-chip info">{{ c.tipoDato }} · {{ c.control }}</span>
+              @if (!c.bActivo) { <span class="rh-chip bad">Desactivada</span> }
+              <button type="button" class="pk-link" (click)="alternarEmpresas(c)">
+                <mat-icon class="rh-inline-icon">domain</mat-icon>
+                {{ c.empresasConValor ? c.empresasConValor + ' empresa(s) con valor propio' : 'Ninguna empresa con valor propio' }}
+                <mat-icon class="rh-inline-icon">{{ abiertas().has(c.clave) ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="pk-control">
+            <div class="slim-label">Valor global</div>
+            <app-campo-dinamico [def]="c" [idCampo]="'pk-' + c.clave" [soloLectura]="!c.bActivo"
+                                [valor]="valor(c)" (valorChange)="cambiar(c, $event)" />
+            @if (cambiado(c)) {
+              @if (impacto()[c.clave]; as i) {
+                <div class="rh-banner warn pk-impacto"><mat-icon>groups</mat-icon>{{ textoImpacto(i) }}</div>
+              }
+              <div class="pn-botones">
+                <button mat-flat-button (click)="guardarGlobal(c)" [disabled]="guardando() === c.clave || !!error(c)">Guardar</button>
+                <button mat-button (click)="deshacer(c)">Deshacer</button>
+              </div>
+            }
+            <div class="pk-acciones">
+              <button mat-icon-button matTooltip="Editar la definición" aria-label="Editar la definición" (click)="editar(c)"><mat-icon>edit_note</mat-icon></button>
+              @if (c.bActivo) {
+                <button mat-icon-button matTooltip="Desactivar" aria-label="Desactivar" (click)="desactivar(c)"><mat-icon>block</mat-icon></button>
+              } @else {
+                <button mat-icon-button matTooltip="Activar" aria-label="Activar" (click)="activar(c)"><mat-icon>check_circle</mat-icon></button>
+              }
+            </div>
+          </div>
+          @if (abiertas().has(c.clave)) {
+            <div class="pk-empresas">
+              <app-constante-empresas [constante]="c" [empresas]="empresas()" (cambio)="valoresCambiados()" />
+            </div>
+          }
+        </div>
+      }
+    </details>
+  } @empty {
+    @if (!cargando()) { <div class="rh-card rh-vacio"><mat-icon>tune</mat-icon>No hay constantes con ese filtro.</div> }
+  }
+</div>

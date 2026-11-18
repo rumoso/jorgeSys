@@ -1,0 +1,253 @@
+<div class="rh-page">
+  <a class="ef-volver" routerLink="/panel/empresas"><mat-icon>arrow_back</mat-icon> Empresas</a>
+
+  @if (error(); as err) {
+    <div class="rh-banner bad"><mat-icon>error_outline</mat-icon>{{ err }}</div>
+  }
+
+  @if (e(); as emp) {
+    <div class="rh-page-head">
+      <div>
+        <h1>{{ emp.nombreComercial }} <span class="rh-chip ef-estado" [class]="claseEstado(emp.estado)">{{ textoEstado(emp.estado) }}</span></h1>
+        <p>{{ emp.razonSocial || 'Sin razón social' }}{{ emp.rfc ? ' · ' + emp.rfc : '' }} · Alta {{ emp.fechaAlta | fechaSucursal: panel.zona() : 'fecha' }}</p>
+      </div>
+      <div class="pn-botones">
+        @if (puedeEntrar()) {
+          <button mat-flat-button (click)="entrar()"><mat-icon>support_agent</mat-icon> Entrar a la empresa</button>
+        }
+      </div>
+    </div>
+
+    @if (cargando() || guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div class="rh-card ef-tabs">
+      <mat-tab-group appTabsDeslizables mat-stretch-tabs="false" animationDuration="150ms">
+        <!-- ── Datos ── -->
+        <mat-tab label="Datos">
+          <div class="ef-panel">
+            <div class="ef-estado-card" [class]="'ef-' + claseEstado(emp.estado)">
+              <div>
+                <div class="slim-label">Estado</div>
+                <div class="ef-estado-texto">{{ textoEstado(emp.estado) }}</div>
+                @if (emp.motivoEstado) { <span class="rh-sub">Motivo: {{ emp.motivoEstado }}</span> }
+                @if (emp.fechaEstado) { <span class="rh-sub">Desde {{ emp.fechaEstado | fechaSucursal: panel.zona() }}</span> }
+                @if (emp.estado === 'EN_BAJA' && emp.fechaBajaProgramada) {
+                  <span class="rh-sub ef-fuerte">Sus datos se eliminan el {{ emp.fechaBajaProgramada | fechaSucursal: panel.zona() }} si no se revierte antes.</span>
+                }
+                @if (emp.fechaEliminacion) { <span class="rh-sub">Eliminada el {{ emp.fechaEliminacion | fechaSucursal: panel.zona() }}</span> }
+              </div>
+              <div class="pn-botones">
+                @if (emp.estado === 'ACTIVA') {
+                  <button mat-stroked-button (click)="suspender()"><mat-icon>pause_circle</mat-icon> Suspender</button>
+                }
+                @if (emp.estado === 'SUSPENDIDA') {
+                  <button mat-stroked-button (click)="reactivar()"><mat-icon>play_circle</mat-icon> Reactivar</button>
+                }
+                @if (emp.estado === 'ACTIVA' || emp.estado === 'SUSPENDIDA') {
+                  <button mat-stroked-button class="ef-peligro" (click)="darDeBaja()"><mat-icon>delete_forever</mat-icon> Dar de baja</button>
+                }
+                @if (emp.estado === 'EN_BAJA') {
+                  <button mat-stroked-button (click)="revertirBaja()"><mat-icon>undo</mat-icon> Revertir baja</button>
+                }
+              </div>
+            </div>
+
+            <div class="ef-cifras">
+              <div><span class="ef-cifra">{{ emp.empleadosActivos }}</span><span class="rh-sub">Empleados activos</span></div>
+              <div><span class="ef-cifra">{{ emp.usuarios }}</span><span class="rh-sub">Usuarios</span></div>
+              <div><span class="ef-cifra">{{ emp.sucursales }}</span><span class="rh-sub">Sucursales</span></div>
+              <div><span class="ef-cifra ef-cifra--texto">{{ emp.ultimoAcceso ? (emp.ultimoAcceso | fechaSucursal: panel.zona()) : '—' }}</span><span class="rh-sub">Último acceso</span></div>
+            </div>
+
+            <form class="ef-form" [formGroup]="datos" (ngSubmit)="guardarDatos()">
+              <div class="rh-card-title">Datos de la empresa</div>
+              @if (bannerDatos(); as b) {
+                <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+              }
+              <div class="rh-grid-2">
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-nombre">Nombre comercial</label>
+                  <input id="ef-nombre" class="inline-input" formControlName="nombreComercial" maxlength="150"
+                         [class.invalido]="datos.controls.nombreComercial.touched && datos.controls.nombreComercial.invalid">
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-rfc">RFC</label>
+                  <input id="ef-rfc" class="inline-input" formControlName="rfc" maxlength="13">
+                </div>
+              </div>
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-razon">Razón social</label>
+                <input id="ef-razon" class="inline-input" formControlName="razonSocial" maxlength="250">
+              </div>
+              @if (!eliminada()) {
+                <div class="pn-botones"><button mat-flat-button type="submit" [disabled]="guardando() || datos.pristine">Guardar datos</button></div>
+              }
+            </form>
+
+            @if (ficha()!.exportaciones.length) {
+              <div class="rh-seccion">
+                <div class="rh-card-title">Exportaciones de la baja</div>
+                @for (x of ficha()!.exportaciones; track x.idExportacion) {
+                  <div class="ef-renglon">
+                    <mat-icon class="rh-inline-icon">description</mat-icon>
+                    <span class="ef-renglon-texto">{{ x.fecha | fechaSucursal: panel.zona() }} · {{ textoTamano(x.tamano) }} · {{ x.superadmin }}</span>
+                    <button mat-stroked-button (click)="descargar(x.idExportacion)"><mat-icon>download</mat-icon> Descargar</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- ── Plan y uso ── -->
+        <mat-tab label="Plan y uso">
+          <div class="ef-panel">
+            @if (ficha()!.plan; as p) {
+              <div class="ef-plan">
+                <div>
+                  <div class="slim-label">Plan vigente</div>
+                  <div class="ef-estado-texto">{{ p.plan }}</div>
+                  <span class="rh-sub">{{ textoTipoCobro(p.tipoCobro) }}{{ p.limiteEmpleados !== null ? ' · hasta ' + p.limiteEmpleados + ' empleados' : '' }}</span>
+                  <span class="rh-sub">
+                    {{ p.tipoCobro === 'LIMITE' ? 'Precio fijo' : 'Por empleado' }}: {{ (p.precioEspecial ?? p.precio) | currency: 'MXN' : 'symbol-narrow' }}
+                    @if (p.precioEspecial !== null) { (especial; el del plan es {{ p.precio | currency: 'MXN' : 'symbol-narrow' }}) }
+                  </span>
+                  <span class="rh-sub">Desde {{ p.fechaInicio | fechaNegocio }}</span>
+                </div>
+                <div class="ef-uso-actual">
+                  <span class="ef-cifra" [class.pn-excedido]="p.limiteEmpleados !== null && emp.empleadosActivos >= p.limiteEmpleados">
+                    {{ emp.empleadosActivos }}{{ p.limiteEmpleados !== null ? ' / ' + p.limiteEmpleados : '' }}
+                  </span>
+                  <span class="rh-sub">Empleados activos hoy</span>
+                </div>
+              </div>
+            } @else {
+              <div class="rh-banner info"><mat-icon>info</mat-icon>La empresa no tiene plan vigente: no tiene límite de empleados.</div>
+            }
+
+            @if (!eliminada()) {
+              <form class="ef-form" [formGroup]="cambioPlan" (ngSubmit)="asignarPlan()">
+                <div class="rh-card-title">Cambiar de plan</div>
+                @if (bannerPlan(); as b) {
+                  <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+                }
+                @if (confirmarLimite(); as aviso) {
+                  <div class="rh-banner warn ef-confirmar">
+                    <mat-icon>warning</mat-icon>
+                    <span class="ef-renglon-texto">{{ aviso }}</span>
+                    <span class="pn-botones">
+                      <button mat-button type="button" (click)="cancelarLimite()">No</button>
+                      <button mat-flat-button type="button" (click)="asignarPlan(true)" [disabled]="guardando()">Asignar de todos modos</button>
+                    </span>
+                  </div>
+                }
+                <div class="rh-grid-2">
+                  <div class="inline-wrap">
+                    <label class="slim-label" for="ef-plan">Plan nuevo</label>
+                    <select id="ef-plan" class="inline-input" formControlName="idPlan">
+                      <option [ngValue]="0">Escoge…</option>
+                      @for (p of planes(); track p.idPlan) {
+                        <option [ngValue]="p.idPlan">{{ p.nombre }} · {{ textoTipoCobro(p.tipoCobro) }}{{ p.limiteEmpleados ? ' · hasta ' + p.limiteEmpleados : '' }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="inline-wrap">
+                    <label class="slim-label" for="ef-inicio">A partir de (opcional)</label>
+                    <input id="ef-inicio" type="date" class="inline-input" formControlName="fechaInicio">
+                    <span class="inline-ayuda">Vacío: hoy. No puede ser futura.</span>
+                  </div>
+                  <div class="inline-wrap">
+                    <label class="slim-label" for="ef-precio">Precio especial (opcional)</label>
+                    <input id="ef-precio" type="number" min="0" step="0.01" class="inline-input" formControlName="precioEspecial" inputmode="decimal">
+                  </div>
+                  <div class="inline-wrap">
+                    <label class="slim-label" for="ef-motivo">Motivo (opcional)</label>
+                    <input id="ef-motivo" class="inline-input" formControlName="motivo" maxlength="500">
+                  </div>
+                </div>
+                <div class="pn-botones"><button mat-flat-button type="submit" [disabled]="guardando()">Asignar plan</button></div>
+              </form>
+            }
+
+            <div class="rh-seccion">
+              <div class="rh-card-title">Uso por mes (máximo de empleados activos)</div>
+              <div class="ef-uso">
+                @for (u of ficha()!.uso; track u.mes) {
+                  <div class="ef-uso-fila">
+                    <span class="ef-uso-mes">{{ textoMes(u.mes) }}</span>
+                    <span class="ef-uso-barra"><span [style.width.%]="((u.maximo ?? 0) / maxUso()) * 100"></span></span>
+                    <span class="ef-uso-num">{{ u.maximo ?? '—' }}</span>
+                    <span class="rh-sub ef-uso-dias">{{ u.dias }} día{{ u.dias === 1 ? '' : 's' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="rh-seccion">
+              <div class="rh-card-title">Planes de la empresa</div>
+              @for (p of ficha()!.planes; track p.idEmpresaPlan) {
+                <div class="ef-renglon">
+                  <mat-icon class="rh-inline-icon">{{ p.vigente ? 'radio_button_checked' : 'history' }}</mat-icon>
+                  <span class="ef-renglon-texto">
+                    <b>{{ p.plan }}</b> · {{ p.fechaInicio | fechaNegocio }} – {{ p.fechaFin ? (p.fechaFin | fechaNegocio) : 'vigente' }}
+                    @if (p.precioEspecial !== null) { · especial {{ p.precioEspecial | currency: 'MXN' : 'symbol-narrow' }} }
+                    <span class="rh-sub">{{ p.superadmin || '(script en el servidor)' }}</span>
+                  </span>
+                </div>
+              } @empty { <div class="rh-sub">Sin planes.</div> }
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ── Módulos ── -->
+        <mat-tab label="Módulos">
+          <div class="ef-panel">
+            @if (bannerModulos(); as b) {
+              <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+            }
+            <p class="rh-sub">Quitar un módulo oculta sus menús en la empresa; sus datos, roles y permisos se conservan.</p>
+            <div class="rh-checks">
+              @for (m of modulos(); track m.modulo) {
+                <label class="rh-check">
+                  <input type="checkbox" [checked]="m.contratado" [disabled]="eliminada() || (!m.disponible && !m.contratado)"
+                         (change)="alternarModulo(m, $any($event.target).checked)">
+                  {{ m.nombre }}@if (!m.disponible) { <span class="rh-chip info">próximamente</span> }
+                </label>
+              }
+            </div>
+            @if (!eliminada()) {
+              <div class="pn-botones"><button mat-flat-button (click)="guardarModulos()" [disabled]="guardando() || !modulosCambiados()">Guardar módulos</button></div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- ── Constantes ── -->
+        <mat-tab label="Constantes">
+          <ng-template matTabContent>
+            <div class="ef-panel">
+              <app-empresa-constantes [idEmpresa]="id()" [soloLectura]="eliminada()" />
+            </div>
+          </ng-template>
+        </mat-tab>
+
+        <!-- ── Historial ── -->
+        <mat-tab label="Historial">
+          <div class="ef-panel">
+            @for (h of ficha()!.historial; track h.idHistorial) {
+              <div class="ef-hist">
+                <div class="ef-hist-cabeza">
+                  <span class="rh-chip info">{{ tipoHistorial(h.tipo) }}</span>
+                  <span class="rh-sub">{{ h.fecha | fechaSucursal: panel.zona() }} · {{ h.superadmin }}</span>
+                </div>
+                @if (h.detalle) { <div class="ef-hist-texto">{{ h.detalle }}</div> }
+                @if (h.motivo) { <div class="rh-sub">Motivo: {{ h.motivo }}</div> }
+              </div>
+            } @empty { <div class="rh-vacio"><mat-icon>history</mat-icon>Sin movimientos.</div> }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  } @else if (cargando()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+</div>

@@ -1,0 +1,137 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Empleados</h1>
+      <p>Las personas que trabajan y checan en tus sucursales. Un empleado puede no tener cuenta para entrar al sistema.</p>
+    </div>
+    <div class="em-botones">
+      @if (global.tienePermiso('empleados_Importar')) {
+        <button mat-stroked-button (click)="importar()"><mat-icon>upload_file</mat-icon> Importar</button>
+      }
+      @if (global.tienePermiso('empleados_CreateUpdate')) {
+        <button mat-flat-button (click)="nuevo()"><mat-icon>person_add</mat-icon> Nuevo</button>
+      }
+    </div>
+  </div>
+
+  <!-- 009: aviso del plan de la empresa -->
+  @if (avisoPlan(); as a) {
+    @if (a.nivel === 'LIMITE') {
+      <div class="rh-banner bad" role="alert"><mat-icon>block</mat-icon>{{ a.mensaje }}</div>
+    } @else if (a.nivel === 'AVISO') {
+      <div class="rh-banner warn" role="status"><mat-icon>warning</mat-icon>{{ a.mensaje }}</div>
+    }
+  }
+
+  <div class="rh-card">
+    <form class="rh-filtros" [formGroup]="filtros" (ngSubmit)="buscar()">
+      <div class="inline-wrap em-busqueda">
+        <label class="slim-label" for="em-q">Buscar</label>
+        <input id="em-q" class="inline-input" formControlName="q" placeholder="Nombre o número" autocomplete="off">
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="em-suc">Sucursal</label>
+        <select id="em-suc" class="inline-input" formControlName="idSucursal">
+          <option [ngValue]="0">Todas</option>
+          @for (s of catalogos().sucursales; track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+        </select>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="em-pue">Puesto</label>
+        <select id="em-pue" class="inline-input" formControlName="idPuesto">
+          <option [ngValue]="0">Todos</option>
+          @for (p of catalogos().puestos; track p.id) { <option [ngValue]="p.id">{{ p.nombre }}</option> }
+        </select>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="em-dep">Departamento</label>
+        <select id="em-dep" class="inline-input" formControlName="idDepartamento">
+          <option [ngValue]="0">Todos</option>
+          @for (d of catalogos().departamentos; track d.id) { <option [ngValue]="d.id">{{ d.nombre }}</option> }
+        </select>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="em-est">Estado</label>
+        <select id="em-est" class="inline-input" formControlName="estado">
+          <option value="activos">Activos</option>
+          <option value="baja">Dados de baja</option>
+          <option value="todos">Todos</option>
+        </select>
+      </div>
+      <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Buscar</button>
+      <button mat-button type="button" (click)="limpiar()">Limpiar</button>
+      <span class="rh-espacio"></span>
+      <button mat-icon-button type="button" (click)="vl.alternar()" [matTooltip]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+        <mat-icon>{{ vl.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+      </button>
+    </form>
+
+    @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div [class.vista-cards]="vl.vista() === 'cards'">
+      <table mat-table appTablaTarjetas [dataSource]="lista()">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Empleado</th>
+          <td mat-cell *matCellDef="let e">
+            <button type="button" class="em-persona" (click)="abrir(e.idEmpleado)">
+              <app-foto-empleado [idEmpleado]="e.idEmpleado" [bFoto]="e.bFoto" [nombre]="e.nombre + ' ' + e.apellidoPaterno" />
+              <span class="em-nombre">{{ e.apellidoPaterno }} {{ e.apellidoMaterno }}, {{ e.nombre }}</span>
+            </button>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="numero">
+          <th mat-header-cell *matHeaderCellDef>Número</th>
+          <td mat-cell *matCellDef="let e">{{ e.numeroEmpleado }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sucursal">
+          <th mat-header-cell *matHeaderCellDef>Sucursal</th>
+          <td mat-cell *matCellDef="let e">
+            <div>{{ e.sucursalPrincipal }}
+              @if (e.idSucursalOperativa !== e.idSucursalPrincipal) {
+                <span class="rh-sub">Trabajando en {{ e.sucursalOperativa }}</span>
+              }
+              @if (e.porReubicar) {
+                <span class="rh-chip warn" matTooltip="Tiene una sucursal desactivada: conviene moverlo a otra">Por reubicar</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="puesto">
+          <th mat-header-cell *matHeaderCellDef>Puesto</th>
+          <td mat-cell *matCellDef="let e">{{ e.puesto || '—' }}@if (e.departamento) { <span class="rh-sub">{{ e.departamento }}</span> }</td>
+        </ng-container>
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let e">
+            @if (e.estado === 'ACTIVO') {
+              <span class="rh-chip ok">Activo</span><span class="rh-sub">Desde {{ e.fechaIngreso | fechaNegocio }}</span>
+            } @else {
+              <span class="rh-chip bad">Baja</span><span class="rh-sub">{{ e.fechaBaja | fechaNegocio }}</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let e" class="col-acciones">
+            @if (global.tienePermiso('empleados_CreateUpdate')) {
+              <button mat-icon-button matTooltip="Abrir la ficha" (click)="abrir(e.idEmpleado)"><mat-icon>edit</mat-icon></button>
+            } @else {
+              <button mat-icon-button matTooltip="Ver la ficha" (click)="abrir(e.idEmpleado)"><mat-icon>visibility</mat-icon></button>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+      </table>
+    </div>
+
+    @if (!cargando() && !lista().length) {
+      <div class="rh-vacio"><mat-icon>groups</mat-icon>No hay empleados con ese filtro.</div>
+    }
+
+    @if (total() > 0) {
+      <mat-paginator [length]="total()" [pageSize]="porPagina()" [pageIndex]="pagina() - 1" [pageSizeOptions]="[25, 50, 100]"
+                     (page)="paginar($event)" aria-label="Páginas de empleados"></mat-paginator>
+    }
+  </div>
+</div>

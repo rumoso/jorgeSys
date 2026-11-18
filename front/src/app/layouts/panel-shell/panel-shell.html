@@ -1,0 +1,44 @@
+<mat-sidenav-container class="sh" autosize>
+  <mat-sidenav class="sh-side" [mode]="celular() ? 'over' : 'side'" [opened]="!celular() || abierto()" (closedStart)="abierto.set(false)"
+               [fixedInViewport]="celular()">
+    <div class="sh-brand">
+      <mat-icon>shield_person</mat-icon><span>Truck Manager</span><span class="ps-marca">Panel</span>
+      @if (celular()) { <button mat-icon-button class="sh-cerrar" (click)="abierto.set(false)" aria-label="Cerrar menú"><mat-icon>close</mat-icon></button> }
+    </div>
+    <nav class="sh-nav">
+      <div class="sh-grupo">Producto</div>
+      @for (i of MENU; track i.ruta) {
+        <a class="sh-item" [routerLink]="i.ruta" routerLinkActive="on"><mat-icon>{{ i.icono }}</mat-icon><span>{{ i.titulo }}</span></a>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="sh-main">
+    <header class="sh-top">
+      @if (celular()) {
+        <button mat-icon-button (click)="abierto.set(true)" aria-label="Abrir menú"><mat-icon>menu</mat-icon></button>
+      }
+      <span class="ps-etiqueta"><mat-icon>admin_panel_settings</mat-icon>Panel del producto</span>
+      <span class="sh-spacer"></span>
+      <button class="sh-avatar ps-avatar" [matMenuTriggerFor]="mUsuario" aria-label="Mi sesión del panel">{{ iniciales() }}</button>
+    </header>
+
+    <main class="sh-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<mat-menu #mModo="matMenu" xPosition="before">
+  @for (m of MODOS; track m.clave) {
+    <button mat-menu-item (click)="theme.aplicar(m.clave, false)">
+      <mat-icon>{{ m.icono }}</mat-icon><span class="sh-menu-texto">{{ m.nombre }}</span>
+      @if (theme.tema() === m.clave) { <mat-icon class="sh-check">check</mat-icon> }
+    </button>
+  }
+</mat-menu>
+<mat-menu #mUsuario="matMenu" xPosition="before">
+  <div class="sh-menu-user"><b>{{ nombre() }}</b>@if (panel.superadmin(); as s) { <small>{{ s.correo }}</small> }</div>
+  <button mat-menu-item [matMenuTriggerFor]="mModo"><mat-icon>contrast</mat-icon>Modo</button>
+  <button mat-menu-item (click)="salir()"><mat-icon>logout</mat-icon>Salir del panel</button>
+</mat-menu>

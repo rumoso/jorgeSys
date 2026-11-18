@@ -1,0 +1,29 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Hoy, {{ hoy | fechaSucursal: auth.zonaActiva().zona : 'largo' : auth.zonaActiva().mixtas }}</h1>
+      <p>Asistencia del día en todas tus sucursales.</p>
+    </div>
+    <button mat-stroked-button disabled><mat-icon>download</mat-icon> Exportar</button>
+  </div>
+
+  <div class="hy-kpis">
+    @for (k of kpis; track k.titulo) {
+      <div class="hy-kpi" [class]="'hy-' + k.clase">
+        <span class="hy-kpi-t"><mat-icon>{{ k.icono }}</mat-icon>{{ k.titulo }}</span>
+        <b>—</b>
+      </div>
+    }
+  </div>
+
+  <div class="hy-cols">
+    <section class="rh-card">
+      <h2 class="rh-card-title">Últimos marcajes</h2>
+      <div class="rh-vacio"><mat-icon>fingerprint</mat-icon>Todavía no hay marcajes.<br>Aparecen aquí en cuanto el personal empiece a checar.</div>
+    </section>
+    <section class="rh-card">
+      <h2 class="rh-card-title">Requiere atención</h2>
+      <div class="rh-vacio"><mat-icon>task_alt</mat-icon>Nada pendiente.<br>Aquí salen faltas sin justificar, horarios arriba del máximo legal y tabletas sin conexión.</div>
+    </section>
+  </div>
+</div>

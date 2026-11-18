@@ -1,0 +1,73 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Dispositivos</h1>
+      <p>Las tabletas o celulares fijos donde checan los empleados de cada sucursal. Se vinculan con un código de un solo uso.</p>
+    </div>
+    @if (global.tienePermiso('dispositivos_CreateUpdate')) {
+      <button mat-flat-button (click)="abrir()"><mat-icon>add</mat-icon> Agregar dispositivo</button>
+    }
+  </div>
+
+  <div class="rh-card">
+    <div class="rh-filtros">
+      <div class="inline-wrap">
+        <label class="slim-label" for="f-suc">Sucursal</label>
+        <select id="f-suc" class="inline-input" [formControl]="sucursal">
+          <option [ngValue]="null">Todas mis sucursales</option>
+          @for (s of auth.sucursales(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+        </select>
+      </div>
+      <button mat-stroked-button (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
+      <span class="rh-espacio"></span>
+      <button mat-icon-button (click)="vl.alternar()" [matTooltip]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+        <mat-icon>{{ vl.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+      </button>
+    </div>
+
+    @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div [class.vista-cards]="vl.vista() === 'cards'">
+      <table mat-table appTablaTarjetas [dataSource]="lista()">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Dispositivo</th>
+          <td mat-cell *matCellDef="let d"><mat-icon class="rh-inline-icon">tablet_android</mat-icon> {{ d.nombre }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sucursal">
+          <th mat-header-cell *matHeaderCellDef>Sucursal</th>
+          <td mat-cell *matCellDef="let d">{{ d.sucursal }}</td>
+        </ng-container>
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let d"><span class="rh-chip" [class]="'rh-chip ' + estado(d).clase">{{ estado(d).texto }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="conexion">
+          <th mat-header-cell *matHeaderCellDef>Última conexión</th>
+          <td mat-cell *matCellDef="let d">{{ d.ultimaConexion ? (d.ultimaConexion | fechaSucursal: d.zonaHoraria) : '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="marcaje">
+          <th mat-header-cell *matHeaderCellDef>Último marcaje</th>
+          <td mat-cell *matCellDef="let d">{{ d.ultimoMarcaje ? (d.ultimoMarcaje | fechaSucursal: d.zonaHoraria) : '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let d" class="col-acciones">
+            @if (d.estado === 'PENDIENTE' && global.tienePermiso('dispositivos_CreateUpdate')) {
+              <button mat-icon-button matTooltip="Generar código para vincular" (click)="abrir(d)"><mat-icon>qr_code_2</mat-icon></button>
+              <button mat-icon-button matTooltip="Eliminar pendiente" (click)="eliminar(d)"><mat-icon>delete_outline</mat-icon></button>
+            }
+            @if (d.estado === 'VINCULADO' && global.tienePermiso('dispositivos_Revocar')) {
+              <button mat-icon-button matTooltip="Revocar" (click)="revocar(d)"><mat-icon>block</mat-icon></button>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+      </table>
+    </div>
+
+    @if (!cargando() && !lista().length) {
+      <div class="rh-vacio"><mat-icon>tablet_android</mat-icon>No hay dispositivos con ese filtro.</div>
+    }
+  </div>
+</div>

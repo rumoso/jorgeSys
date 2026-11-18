@@ -1,0 +1,114 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ idCreada() ? 'Empresa creada' : 'Nueva empresa' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+
+    @if (password(); as p) {
+      <div class="ea-password">
+        <div class="slim-label">Contraseña provisional del administrador</div>
+        <div class="ea-password-fila">
+          <code class="ea-password-valor">{{ p }}</code>
+          <button mat-stroked-button type="button" (click)="copiar()"><mat-icon>{{ copiado() ? 'check' : 'content_copy' }}</mat-icon> {{ copiado() ? 'Copiada' : 'Copiar' }}</button>
+        </div>
+        <span class="inline-ayuda">Solo se muestra esta vez y no se guarda en ningún lado. Entrégasela al administrador por un medio seguro.</span>
+      </div>
+    }
+
+    <div class="rh-card-title"><mat-icon class="rh-inline-icon">domain</mat-icon> Empresa</div>
+    <div class="rh-grid-2">
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-nombre">Nombre comercial</label>
+        <input id="ea-nombre" class="inline-input" formControlName="nombreComercial" maxlength="150"
+               [class.invalido]="form.controls.nombreComercial.touched && form.controls.nombreComercial.invalid">
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-rfc">RFC (opcional)</label>
+        <input id="ea-rfc" class="inline-input" formControlName="rfc" maxlength="13" autocomplete="off">
+      </div>
+    </div>
+    <div class="inline-wrap">
+      <label class="slim-label" for="ea-razon">Razón social (opcional)</label>
+      <input id="ea-razon" class="inline-input" formControlName="razonSocial" maxlength="250">
+    </div>
+
+    <div class="rh-seccion">
+      <div class="rh-card-title"><mat-icon class="rh-inline-icon">storefront</mat-icon> Primera sucursal</div>
+      <div class="rh-grid-2">
+        <div class="inline-wrap">
+          <label class="slim-label" for="ea-suc">Nombre</label>
+          <input id="ea-suc" class="inline-input" formControlName="sucursal" maxlength="100"
+                 [class.invalido]="form.controls.sucursal.touched && form.controls.sucursal.invalid">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="ea-zona">Zona horaria</label>
+          <select id="ea-zona" class="inline-input" formControlName="zonaHoraria">
+            @for (z of catalogos().zonas; track z.zona) { <option [value]="z.zona">{{ z.nombre }}</option> }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="rh-seccion">
+      <div class="rh-card-title"><mat-icon class="rh-inline-icon">admin_panel_settings</mat-icon> Administrador</div>
+      <div class="rh-grid-2">
+        <div class="inline-wrap">
+          <label class="slim-label" for="ea-correo">Correo</label>
+          <input id="ea-correo" type="email" class="inline-input" formControlName="correoAdmin" autocomplete="off"
+                 [class.invalido]="form.controls.correoAdmin.touched && form.controls.correoAdmin.invalid">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="ea-nadmin">Nombre (si la cuenta es nueva)</label>
+          <input id="ea-nadmin" class="inline-input" formControlName="nombreAdmin" maxlength="150">
+        </div>
+      </div>
+      <span class="inline-ayuda">Si el correo ya tiene cuenta, solo se le da acceso a la empresa nueva. Si no, se crea con una contraseña provisional.</span>
+    </div>
+
+    <div class="rh-seccion">
+      <div class="rh-card-title"><mat-icon class="rh-inline-icon">extension</mat-icon> Módulos contratados</div>
+      <div class="rh-checks">
+        @for (m of catalogos().modulos; track m.modulo) {
+          <label class="rh-check">
+            <input type="checkbox" [checked]="modulos().has(m.modulo)" [disabled]="!!idCreada()" (change)="alternarModulo(m.modulo, $any($event.target).checked)">
+            {{ m.nombre }}
+          </label>
+        }
+      </div>
+    </div>
+
+    <div class="rh-seccion">
+      <div class="rh-card-title"><mat-icon class="rh-inline-icon">workspace_premium</mat-icon> Plan</div>
+      <div class="rh-grid-2">
+        <div class="inline-wrap">
+          <label class="slim-label" for="ea-plan">Plan</label>
+          <select id="ea-plan" class="inline-input" formControlName="idPlan">
+            @for (p of planes(); track p.idPlan) {
+              <option [ngValue]="p.idPlan">{{ p.nombre }} · {{ textoTipoCobro(p.tipoCobro) }}{{ p.limiteEmpleados ? ' · hasta ' + p.limiteEmpleados : '' }}</option>
+            }
+          </select>
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="ea-precio">Precio especial (opcional)</label>
+          <input id="ea-precio" class="inline-input" type="number" min="0" step="0.01" formControlName="precioEspecial" inputmode="decimal">
+        </div>
+      </div>
+    </div>
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (idCreada()) {
+      <button mat-flat-button (click)="verFicha()"><mat-icon>open_in_new</mat-icon> Abrir la ficha</button>
+    } @else {
+      <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Dar de alta</button>
+    }
+  </div>
+</div>

@@ -1,0 +1,17 @@
+# Dependencias y compilados
+node_modules/
+dist/
+.angular/
+
+# Secretos: ningún .env se versiona, salvo la plantilla
+.env
+*.env
+!.example.env
+
+# Archivos subidos por las empresas
+back/almacen/
+uploads/
+
+# Modelo de MySQL Workbench (binario)
+*.mwb
+*.mwb.bak

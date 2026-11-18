@@ -1,0 +1,68 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Cobro</h1>
+      <p>Por empresa: su plan del mes, sus empleados del mes (el máximo de los conteos diarios) y el importe.</p>
+    </div>
+  </div>
+
+  <div class="rh-card">
+    <form class="rh-filtros" (ngSubmit)="buscar()">
+      <div class="inline-wrap">
+        <label class="slim-label" for="pc-mes">Mes</label>
+        <input id="pc-mes" type="month" class="inline-input" [formControl]="mes">
+      </div>
+      <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Buscar</button>
+      <button mat-stroked-button type="button" (click)="exportar()" [disabled]="exportando()"><mat-icon>download</mat-icon> Exportar a Excel</button>
+      <span class="rh-espacio"></span>
+      <button mat-icon-button type="button" (click)="vl.alternar()" [matTooltip]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'"
+              [attr.aria-label]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+        <mat-icon>{{ vl.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+      </button>
+    </form>
+
+    @if (cargando() || exportando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    @if (datos(); as d) {
+      <div class="rh-sub pc-titulo">{{ textoMes(d.mes) }} · {{ d.filas.length }} empresa(s)</div>
+      <div [class.vista-cards]="vl.vista() === 'cards'">
+        <table mat-table appTablaTarjetas [dataSource]="d.filas">
+          <ng-container matColumnDef="empresa">
+            <th mat-header-cell *matHeaderCellDef>Empresa</th>
+            <td mat-cell *matCellDef="let f">
+              {{ f.nombreComercial }}
+              @if (f.estado !== 'ACTIVA') { <span class="rh-chip" [class]="claseEstado(f.estado)">{{ textoEstado(f.estado) }}</span> }
+              @if (f.rfc) { <span class="rh-sub">{{ f.rfc }}</span> }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="plan">
+            <th mat-header-cell *matHeaderCellDef>Plan</th>
+            <td mat-cell *matCellDef="let f">{{ f.plan }}<span class="rh-sub">{{ textoTipoCobro(f.tipoCobro) }}{{ f.limiteEmpleados !== null ? ' · hasta ' + f.limiteEmpleados : '' }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="empleados">
+            <th mat-header-cell *matHeaderCellDef>Empleados del mes</th>
+            <td mat-cell *matCellDef="let f">{{ f.empleadosMes }}<span class="rh-sub">{{ f.diasContados }} día(s) contados</span></td>
+          </ng-container>
+          <ng-container matColumnDef="precio">
+            <th mat-header-cell *matHeaderCellDef>Precio</th>
+            <td mat-cell *matCellDef="let f">
+              {{ f.precioAplicado | currency: 'MXN' : 'symbol-narrow' }}{{ f.tipoCobro === 'POR_EMPLEADO' ? ' c/u' : '' }}
+              @if (f.precioEspecial !== null) { <span class="rh-sub">Especial (plan: {{ f.precio | currency: 'MXN' : 'symbol-narrow' }})</span> }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="importe">
+            <th mat-header-cell *matHeaderCellDef class="pn-num">Importe</th>
+            <td mat-cell *matCellDef="let f" class="pn-num"><b>{{ f.importe | currency: 'MXN' : 'symbol-narrow' }}</b></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+        </table>
+      </div>
+      @if (d.filas.length) {
+        <div class="pn-total"><span>Total</span><span>{{ d.total | currency: 'MXN' : 'symbol-narrow' }}</span></div>
+      } @else if (!cargando()) {
+        <div class="rh-vacio"><mat-icon>request_quote</mat-icon>Ninguna empresa tuvo plan en ese mes.</div>
+      }
+    }
+  </div>
+</div>

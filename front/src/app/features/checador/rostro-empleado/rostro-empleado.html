@@ -1,0 +1,106 @@
+<div class="re">
+  @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  @if (banner(); as b) {
+    <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+  }
+
+  @if (estado(); as e) {
+    <!-- Estado -->
+    <div class="re-estado">
+      @switch (e.estado) {
+        @case ('REGISTRADO') { <span class="rh-chip ok"><mat-icon class="rh-inline-icon">face</mat-icon> Rostro registrado</span> }
+        @case ('SIN_ROSTRO') { <span class="rh-chip warn">Con consentimiento, sin rostro</span> }
+        @default { <span class="rh-chip info">Sin consentimiento</span> }
+      }
+      @if (e.rostro; as r) {
+        <span class="rh-sub">Registrado por {{ r.registradoPor || '—' }} el {{ r.fechaRegistro | fechaSucursal: zona().zona }} · {{ r.tomas }} tomas</span>
+      }
+      @if (!activo()) { <span class="rh-sub">El empleado está dado de baja: su rostro no participa al checar.</span> }
+    </div>
+
+    <!-- Consentimiento -->
+    <div class="re-seccion">
+      <div class="rh-card-title"><mat-icon class="rh-inline-icon">verified_user</mat-icon> Consentimiento</div>
+      @if (e.consentimiento; as c) {
+        <span class="rh-sub">Aceptó la versión {{ c.version }} el {{ c.fechaAceptacion | fechaSucursal: zona().zona : 'fecha' }} ({{ medio(c.evidencia?.medio) }}).</span>
+        @if (c.hayVersionNueva) { <span class="rh-sub">Hay una versión nueva del texto; puede aceptarla abajo.</span> }
+      }
+      @if (puedeRegistrar && activo() && (!e.consentimiento || e.consentimiento.hayVersionNueva) && e.textoVigente; as t) {
+        @if (verTexto()) {
+          <div class="re-texto">{{ t.texto }}</div>
+          <div class="rh-grid-2" [formGroup]="form">
+            <div class="inline-wrap">
+              <label class="slim-label" for="re-medio">Cómo consta</label>
+              <select id="re-medio" class="inline-input" formControlName="medio">
+                <option value="PAPEL_FIRMADO">Firmó el texto en papel</option>
+                <option value="EN_PANTALLA">Lo leyó y aceptó en esta pantalla</option>
+              </select>
+            </div>
+            <div class="inline-wrap">
+              <label class="slim-label" for="re-nota">Nota (opcional)</label>
+              <input id="re-nota" class="inline-input" formControlName="nota" maxlength="250" placeholder="Folio del expediente">
+            </div>
+          </div>
+          <div class="re-botones">
+            <button mat-button (click)="verTexto.set(false)">Cancelar</button>
+            <button mat-flat-button (click)="aceptar()" [disabled]="guardando()">Registrar aceptación (versión {{ t.version }})</button>
+          </div>
+        } @else {
+          <div class="re-botones izq"><button mat-stroked-button (click)="verTexto.set(true)"><mat-icon>description</mat-icon> Mostrar el texto para aceptar</button></div>
+        }
+      }
+      @if (puedeRegistrar && e.consentimiento) {
+        <div class="re-botones izq">
+          <button mat-button class="re-peligro" (click)="retirar()" [disabled]="guardando()"><mat-icon>person_remove</mat-icon> Retirar consentimiento</button>
+        </div>
+        <span class="inline-ayuda">Retirarlo elimina su rostro registrado. Podrá checar por otra forma.</span>
+      }
+    </div>
+
+    <!-- Rostro -->
+    @if (e.consentimiento && activo()) {
+      <div class="re-seccion">
+        <div class="rh-card-title"><mat-icon class="rh-inline-icon">face_retouching_natural</mat-icon> Rostro</div>
+        @if (parecido(); as p) {
+          <div class="rh-banner bad"><mat-icon>warning</mat-icon>{{ p.mensaje }}</div>
+          <ul class="re-parecidos">
+            @for (x of p.parecidos; track $index) { <li>{{ x.nombre }} (No. {{ x.numeroEmpleado }}) · parecido {{ porcentaje(x.similitud) }}</li> }
+          </ul>
+          <div class="re-botones">
+            <button mat-button (click)="descartarParecido()">No guardar</button>
+            <button mat-flat-button (click)="confirmarParecido()" [disabled]="guardando()">Sí es {{ e.empleado.nombre }}: guardar</button>
+          </div>
+        } @else if (capturando()) {
+          <p class="rh-sub">Que {{ e.empleado.nombre }} se pare frente a la cámara con buena luz, sin lentes oscuros ni gorra, y siga las indicaciones.</p>
+          <app-captura-rostro modo="REGISTRO" [pedirReto]="pedirReto" [pausado]="procesando()" [minTomas]="e.tomasRegistro"
+                              (capturada)="alCapturar($event)" (camara)="camaraLista($event)" />
+          <div class="re-botones"><button mat-button (click)="capturando.set(false)">Cancelar</button></div>
+        } @else if (puedeRegistrar) {
+          <div class="re-botones izq">
+            <button mat-flat-button (click)="registrar()"><mat-icon>photo_camera</mat-icon> {{ e.rostro ? 'Volver a registrar' : 'Registrar rostro' }}</button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Formas de checar -->
+    @if (formas().length) {
+      <div class="re-seccion">
+        <div class="rh-card-title"><mat-icon class="rh-inline-icon">rule</mat-icon> Formas de checar</div>
+        <span class="rh-sub">Por regla, usa las de su sucursal principal ({{ sucursalPrincipal() }}). Una excepción manda sobre la regla.</span>
+        @for (f of formas(); track f.forma) {
+          <div class="re-forma">
+            <mat-icon class="rh-inline-icon">{{ f.icono }}</mat-icon>
+            <span class="re-forma-nombre">{{ f.nombre }}</span>
+            <select class="inline-input" [value]="valorForma(f)" [disabled]="!puedeFormas" (change)="cambiarForma(f, $any($event.target).value)"
+                    [attr.aria-label]="'Excepción de ' + f.nombre">
+              <option value="sucursal">Como su sucursal ({{ f.sucursal ? 'permitida' : 'no permitida' }})</option>
+              <option value="si">Permitida</option>
+              <option value="no">No permitida</option>
+            </select>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

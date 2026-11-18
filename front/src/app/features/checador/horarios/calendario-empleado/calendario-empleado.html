@@ -1,0 +1,45 @@
+<div class="ce">
+  <div class="ce-nav">
+    <button mat-icon-button (click)="mover(-1)" matTooltip="Semana anterior" aria-label="Semana anterior"><mat-icon>chevron_left</mat-icon></button>
+    <button mat-stroked-button (click)="mover(0)">Esta semana</button>
+    <button mat-icon-button (click)="mover(1)" matTooltip="Semana siguiente" aria-label="Semana siguiente"><mat-icon>chevron_right</mat-icon></button>
+    <span class="rh-espacio"></span>
+    @if (datos(); as d) { <span class="ce-tenue">Días generados hasta el {{ d.horizonte | fechaNegocio }}</span> }
+  </div>
+  @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  @if (error(); as e) { <div class="rh-banner bad"><mat-icon>error_outline</mat-icon>{{ e }}</div> }
+
+  @for (s of semanas(); track s.lunes) {
+    <div class="ce-semana-titulo">Semana del {{ fechaCorta(s.lunes) }} al {{ fechaCorta(s.domingo) }}</div>
+    <div class="ce-semana">
+      @for (x of s.dias; track x.fecha) {
+        @if (x.dia; as d) {
+          <button type="button" class="ce-dia" (click)="abrir(d)"
+                  [class.ce-hoy]="x.fecha === hoy()" [class.ce-descanso]="d.estado === 'DESCANSO'" [class.ce-sin]="d.estado === 'SIN_HORARIO'"
+                  [class.ce-manual]="d.bManual" [attr.aria-label]="(puedeCambiar ? 'Cambiar el ' : 'Ver el ') + d.nombreDia + ' ' + fechaCorta(x.fecha)">
+            <span class="ce-fecha">{{ corto(x.k) }} {{ fechaCorta(x.fecha).slice(0, 5) }}@if (x.fecha === hoy()) { <span class="rh-chip info">Hoy</span> }</span>
+            <span class="ce-turno">{{ turno(d) }}</span>
+            @if (d.estado === 'LABORABLE') {
+              <span class="ce-horas">{{ horas(d.horas) }}@if (d.tipoJornada) { · {{ jornada[d.tipoJornada] }} }
+                @if (d.bExcede) { <mat-icon class="ce-aviso" [matTooltip]="'Pasa del máximo de ' + d.maximoDiario + ' h'">warning</mat-icon> }</span>
+            }
+            <span class="ce-suc">{{ d.sucursal }}</span>
+            <span class="ce-chips">
+              @if (d.bManual) { <span class="rh-chip warn" [matTooltip]="d.motivo || ''">A mano</span> }
+              @if (d.idSucursalCobertura) { <span class="rh-chip info" [matTooltip]="'Cubre en ' + d.sucursalCobertura + ' desde las ' + d.horaCobertura">Cubre {{ d.sucursalCobertura }} {{ d.horaCobertura }}</span> }
+            </span>
+          </button>
+        } @else {
+          <div class="ce-dia ce-vacio" [class.ce-hoy]="x.fecha === hoy()">
+            <span class="ce-fecha">{{ corto(x.k) }} {{ fechaCorta(x.fecha).slice(0, 5) }}</span>
+            <span class="ce-tenue">Sin día programado</span>
+          </div>
+        }
+      }
+    </div>
+  }
+  <span class="inline-ayuda">
+    @if (puedeCambiar) { Toca un día para cambiarlo a mano (con motivo) o marcar una cobertura. } @else { Toca un día para ver su detalle. }
+    "Sin día programado": antes del ingreso, después de la baja o más allá de lo generado.
+  </span>
+</div>

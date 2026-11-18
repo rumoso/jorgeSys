@@ -1,0 +1,23 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ id() ? (puedeGuardar ? 'Editar ' + data.tipo.singular : 'Ver ' + data.tipo.singular) : 'Nuevo ' + data.tipo.singular }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  <form class="rh-dialog-body" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    <div class="inline-wrap">
+      <label class="slim-label" for="cs-nombre">Nombre</label>
+      <input id="cs-nombre" class="inline-input" [formControl]="nombre" maxlength="100" autocomplete="off"
+             [class.invalido]="nombre.touched && nombre.invalid">
+      <span class="inline-ayuda">Único dentro de la empresa. No se borra: si deja de usarse, se desactiva.</span>
+    </div>
+    <button type="submit" hidden></button>
+  </form>
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (puedeGuardar) { <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Guardar</button> }
+  </div>
+</div>

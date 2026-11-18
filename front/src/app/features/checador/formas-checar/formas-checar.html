@@ -1,0 +1,60 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Formas de checar</h1>
+      <p>Por sucursal, cómo pueden registrar su asistencia los empleados. Un empleado puede tener una excepción en su ficha (pestaña Face ID).</p>
+    </div>
+  </div>
+
+  @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  @if (!puedeConfigurar) {
+    <div class="rh-banner info"><mat-icon>visibility</mat-icon>Solo lectura: para cambiarlas necesitas el permiso "Activar y configurar las formas de checar".</div>
+  }
+
+  <div class="fc-grid">
+    @for (s of sucursales(); track s.idSucursal) {
+      <div class="rh-card">
+        <div class="rh-card-title"><mat-icon class="rh-inline-icon">storefront</mat-icon> {{ s.nombre }}</div>
+        <div class="fc-lista">
+          @for (f of formas(); track f.forma) {
+            <div class="fc-forma" [class.pronto]="f.estado === 'PROXIMAMENTE'">
+              <mat-icon class="fc-icono">{{ f.icono }}</mat-icon>
+              <div class="fc-texto">
+                <b>{{ f.nombre }}</b>
+                <span class="rh-sub">{{ f.descripcion }}</span>
+              </div>
+              @if (f.estado === 'PROXIMAMENTE') {
+                <span class="rh-chip info">Próximamente</span>
+              } @else {
+                <mat-slide-toggle [checked]="activa(s, f)" [disabled]="!puedeConfigurar || guardando() === s.idSucursal + ':' + f.forma"
+                                  (change)="cambiar(s, f, $event.checked)" [attr.aria-label]="f.nombre + ' en ' + s.nombre"></mat-slide-toggle>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="rh-card fc-consentimiento">
+    <div class="rh-card-title"><mat-icon class="rh-inline-icon">verified_user</mat-icon> Consentimiento de Face ID</div>
+    @if (consentimiento(); as c) {
+      <span class="rh-sub">Versión vigente: <b>{{ c.version }}</b>, desde {{ c.vigenteDesde | fechaSucursal: auth.zonaActiva().zona : 'fecha' }}. El empleado lo acepta antes de registrar su rostro.</span>
+    }
+    @if (bannerTexto(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    <div class="inline-wrap">
+      <label class="slim-label" for="fc-texto">Texto</label>
+      <textarea id="fc-texto" class="inline-input fc-textarea" rows="7" [formControl]="texto" maxlength="5000"></textarea>
+      @if (puedeEditarTexto) {
+        <span class="inline-ayuda">Guardar crea una versión nueva; quien ya aceptó conserva la versión que aceptó.</span>
+      }
+    </div>
+    @if (puedeEditarTexto) {
+      <div class="fc-acciones">
+        <button mat-flat-button (click)="guardarTexto()" [disabled]="guardandoTexto() || texto.pristine">Guardar versión nueva</button>
+      </div>
+    }
+  </div>
+</div>

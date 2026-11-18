@@ -1,0 +1,103 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ editando() ? 'Definición de ' + form.controls.clave.value : 'Nueva constante' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok">
+        <mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>
+        <div>
+          {{ b.texto }}
+          @if (invalidos().length) {
+            <ul class="cm-invalidos">
+              @for (i of invalidos(); track $index) {
+                <li><b>{{ i.empresa ?? 'Valor global' }}</b>: {{ texto(previa(), i.valor) }} — {{ i.mensaje }}</li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="cm-cuerpo">
+      <div class="cm-campos">
+        <div class="rh-grid-2">
+          <div class="inline-wrap">
+            <label class="slim-label" for="cm-clave">Clave</label>
+            <input id="cm-clave" class="inline-input cm-mono" formControlName="clave" maxlength="80" placeholder="grupo.nombre_corto" autocomplete="off"
+                   [class.invalido]="form.controls.clave.touched && form.controls.clave.invalid">
+            @if (editando()) { <span class="inline-ayuda">No se cambia: el código ya la lee así.</span> }
+          </div>
+          <div class="inline-wrap">
+            <label class="slim-label" for="cm-tipo">Tipo de dato</label>
+            <select id="cm-tipo" class="inline-input" formControlName="tipoDato">
+              @for (t of TIPOS; track t) { <option [value]="t">{{ t }}</option> }
+            </select>
+            @if (editando()) { <span class="inline-ayuda">No se cambia una vez creada.</span> }
+          </div>
+          <div class="inline-wrap">
+            <label class="slim-label" for="cm-grupo">Grupo</label>
+            <input id="cm-grupo" class="inline-input" formControlName="grupo" maxlength="60" list="cm-grupos"
+                   [class.invalido]="form.controls.grupo.touched && form.controls.grupo.invalid">
+            <datalist id="cm-grupos">@for (g of data.grupos; track g) { <option [value]="g"></option> }</datalist>
+          </div>
+          <div class="inline-wrap">
+            <label class="slim-label" for="cm-orden">Orden</label>
+            <input id="cm-orden" class="inline-input" type="number" step="1" formControlName="orden">
+          </div>
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="cm-etiqueta">Etiqueta</label>
+          <input id="cm-etiqueta" class="inline-input" formControlName="etiqueta" maxlength="150"
+                 [class.invalido]="form.controls.etiqueta.touched && form.controls.etiqueta.invalid">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="cm-ayuda">Ayuda (opcional)</label>
+          <textarea id="cm-ayuda" class="inline-input cm-area" formControlName="ayuda" rows="2"></textarea>
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="cm-control">Control</label>
+          <select id="cm-control" class="inline-input" formControlName="control">
+            @for (c of CONTROLES; track c.valor) { <option [value]="c.valor">{{ c.texto }}</option> }
+          </select>
+          <span class="inline-ayuda">Casilla e interruptor son para un dato sí/no (booleano); opciones y lista desplegable necesitan opciones.</span>
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="cm-opciones">Opciones (una por renglón: valor|texto)</label>
+          <textarea id="cm-opciones" class="inline-input cm-area cm-mono" formControlName="opciones" rows="3" placeholder="1|Lunes&#10;2|Martes"></textarea>
+        </div>
+        <div class="slim-label">Validación (opcional)</div>
+        <div class="rh-grid-2 cm-validacion">
+          <div class="inline-wrap"><label class="slim-label" for="cm-min">Mínimo</label><input id="cm-min" class="inline-input" formControlName="min"></div>
+          <div class="inline-wrap"><label class="slim-label" for="cm-max">Máximo</label><input id="cm-max" class="inline-input" formControlName="max"></div>
+          <div class="inline-wrap"><label class="slim-label" for="cm-unidad">Unidad</label><input id="cm-unidad" class="inline-input" formControlName="unidad" placeholder="minutos"></div>
+          <div class="inline-wrap"><label class="slim-label" for="cm-maxlen">Largo máximo</label><input id="cm-maxlen" class="inline-input" type="number" min="1" formControlName="maxLength"></div>
+          <div class="inline-wrap"><label class="slim-label" for="cm-patron">Patrón</label><input id="cm-patron" class="inline-input cm-mono" formControlName="patron"></div>
+          <label class="rh-check cm-multiple"><input type="checkbox" formControlName="multiple"> Varias opciones (lista)</label>
+        </div>
+      </div>
+
+      <div class="cm-previa">
+        <div class="slim-label"><mat-icon class="rh-inline-icon">visibility</mat-icon> Vista previa</div>
+        <div class="cm-previa-caja">
+          <label class="cm-previa-etiqueta" for="cm-prev">{{ previa().etiqueta }}</label>
+          @if (previa().ayuda) { <p class="cm-previa-ayuda">{{ previa().ayuda }}</p> }
+          <app-campo-dinamico [def]="previa()" idCampo="cm-prev" [(valor)]="valorPrevio" />
+        </div>
+        <span class="inline-ayuda">
+          @if (editando()) { Así se verá el control. Para cambiar el valor global, usa la lista de constantes. }
+          @else { El valor de la vista previa es el valor global con el que se crea. }
+        </span>
+      </div>
+    </div>
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    <button mat-flat-button (click)="guardar()" [disabled]="guardando()">{{ editando() ? 'Guardar definición' : 'Crear constante' }}</button>
+  </div>
+</div>

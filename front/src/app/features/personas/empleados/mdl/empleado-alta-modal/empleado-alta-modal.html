@@ -1,0 +1,75 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>Nuevo empleado</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    @if (parecidos(); as p) {
+      <div class="rh-banner info">
+        <mat-icon>person_search</mat-icon>
+        <div>
+          <div>{{ p.mensaje }}</div>
+          <ul class="ea-parecidos">
+            @for (x of p.lista; track x.idEmpleado) {
+              <li><strong>{{ x.numeroEmpleado }}</strong> {{ x.nombreCompleto }} · {{ x.sucursal }}
+                @if (x.estado === 'BAJA') { <span class="rh-chip bad">Dado de baja</span> } · {{ x.motivo }}</li>
+            }
+            @if (p.fuera) { <li>{{ p.fuera }} más en sucursales que no tienes asignadas.</li> }
+          </ul>
+          <div>Si es alguien que regresa, conviene <strong>reingresarlo</strong> desde su ficha en lugar de darlo de alta otra vez.</div>
+        </div>
+      </div>
+    }
+
+    <p class="inline-ayuda">Con esto basta para darlo de alta; el resto se completa en su ficha.</p>
+    <div class="rh-grid-2">
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-num">Número de empleado</label>
+        <input id="ea-num" class="inline-input" formControlName="numeroEmpleado" maxlength="20" autocomplete="off">
+        <span class="inline-ayuda">El sistema propone el siguiente; puedes cambiarlo.</span>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-suc">Sucursal principal</label>
+        <select id="ea-suc" class="inline-input" formControlName="idSucursalPrincipal"
+                [class.invalido]="form.controls.idSucursalPrincipal.touched && form.controls.idSucursalPrincipal.invalid">
+          <option [ngValue]="0" disabled>Escoge…</option>
+          @for (s of sucursales; track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+        </select>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-nom">Nombre(s)</label>
+        <input id="ea-nom" class="inline-input" formControlName="nombre" maxlength="80" autocomplete="off"
+               [class.invalido]="form.controls.nombre.touched && form.controls.nombre.invalid">
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-pat">Apellido paterno</label>
+        <input id="ea-pat" class="inline-input" formControlName="apellidoPaterno" maxlength="60" autocomplete="off"
+               [class.invalido]="form.controls.apellidoPaterno.touched && form.controls.apellidoPaterno.invalid">
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-mat">Apellido materno</label>
+        <input id="ea-mat" class="inline-input" formControlName="apellidoMaterno" maxlength="60" autocomplete="off">
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="ea-ing">Fecha de ingreso</label>
+        <input id="ea-ing" type="date" class="inline-input" formControlName="fechaIngreso">
+        <span class="inline-ayuda">Hoy, en la zona de la sucursal.</span>
+      </div>
+    </div>
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cancelar</button>
+    @if (parecidos()) {
+      <button mat-flat-button (click)="guardar(true)" [disabled]="guardando()">Es otra persona: darla de alta</button>
+    } @else {
+      <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Dar de alta</button>
+    }
+  </div>
+</div>

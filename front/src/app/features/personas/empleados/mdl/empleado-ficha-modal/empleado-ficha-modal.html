@@ -1,0 +1,281 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    @if (emp(); as e) {
+      <app-foto-empleado [idEmpleado]="e.idEmpleado" [bFoto]="e.bFoto" [nombre]="e.nombre + ' ' + e.apellidoPaterno" [tam]="34" [version]="versionFoto()" />
+      <h2>{{ e.nombreCompleto }} <span class="rh-sub">Núm. {{ e.numeroEmpleado }}
+        @if (e.estado === 'BAJA') { · <span class="rh-chip bad">Baja desde {{ e.fechaBaja | fechaNegocio }}</span> }
+        @if (e.porReubicar) { · <span class="rh-chip warn">Por reubicar</span> }</span></h2>
+    } @else {
+      <h2>Empleado</h2>
+    }
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (cargando() || guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="rh-dialog-body ef-cuerpo">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.tipo === 'ok'" [class.bad]="b.tipo === 'bad'" [class.info]="b.tipo === 'info'">
+        <mat-icon>{{ b.tipo === 'ok' ? 'check_circle' : b.tipo === 'bad' ? 'error_outline' : 'info' }}</mat-icon>{{ b.texto }}
+      </div>
+    }
+    @if (confirmarHorario(); as c) {
+      <div class="rh-banner info ef-confirmar" role="alertdialog" aria-label="¿Conserva su horario o toma el de la nueva sucursal?">
+        <mat-icon>schedule</mat-icon>
+        <div>
+          <div>{{ c.mensaje }}</div>
+          <div class="ef-confirmar-botones">
+            <button mat-flat-button type="button" (click)="decidirHorario('conservar')" [disabled]="guardando()">Conserva su horario</button>
+            <button mat-stroked-button type="button" (click)="decidirHorario('tomar')" [disabled]="guardando()">Toma el de {{ c.sucursalNueva || 'la nueva sucursal' }}</button>
+            <button mat-button type="button" (click)="decidirHorario(null)" [disabled]="guardando()">No cambiar la sucursal</button>
+          </div>
+        </div>
+      </div>
+    }
+    @if (aviso(); as a) {
+      <div class="rh-banner info"><mat-icon>schedule</mat-icon>{{ a }}</div>
+    }
+    @if (!puedeEditar && emp()) {
+      <div class="rh-banner info"><mat-icon>lock</mat-icon>Solo consulta: no tienes permiso para editar empleados.</div>
+    }
+
+    @if (emp(); as e) {
+      <mat-tab-group appTabsDeslizables mat-stretch-tabs="false" animationDuration="150ms" [selectedIndex]="pestana()" (selectedIndexChange)="pestana.set($event)">
+        <!-- ── Datos ── -->
+        <mat-tab label="Datos">
+          <form class="ef-tab" [formGroup]="form" (ngSubmit)="guardar()">
+            <div class="ef-foto">
+              <app-foto-empleado [idEmpleado]="e.idEmpleado" [bFoto]="e.bFoto" [nombre]="e.nombre + ' ' + e.apellidoPaterno" [tam]="88" [version]="versionFoto()" />
+              @if (puedeEditar) {
+                <div class="ef-foto-botones">
+                  <input #archivoFoto type="file" accept="image/jpeg,image/png,image/webp" hidden (change)="subirFoto($event)">
+                  <button mat-stroked-button type="button" (click)="archivoFoto.click()">
+                    <mat-icon>photo_camera</mat-icon> {{ e.bFoto ? 'Cambiar foto' : 'Subir foto' }}
+                  </button>
+                  @if (e.bFoto) { <button mat-button type="button" (click)="quitarFoto()">Quitar</button> }
+                  <span class="inline-ayuda">JPG, PNG o WebP.</span>
+                </div>
+              }
+            </div>
+
+            <div class="rh-card-title">Identificación</div>
+            <div class="rh-grid-2">
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-num">Número de empleado</label>
+                <input id="ef-num" class="inline-input" formControlName="numeroEmpleado" maxlength="20"
+                       [class.invalido]="form.controls.numeroEmpleado.touched && form.controls.numeroEmpleado.invalid">
+              </div>
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-nom">Nombre(s)</label>
+                <input id="ef-nom" class="inline-input" formControlName="nombre" maxlength="80"
+                       [class.invalido]="form.controls.nombre.touched && form.controls.nombre.invalid">
+              </div>
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-pat">Apellido paterno</label>
+                <input id="ef-pat" class="inline-input" formControlName="apellidoPaterno" maxlength="60"
+                       [class.invalido]="form.controls.apellidoPaterno.touched && form.controls.apellidoPaterno.invalid">
+              </div>
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-mat">Apellido materno</label>
+                <input id="ef-mat" class="inline-input" formControlName="apellidoMaterno" maxlength="60">
+              </div>
+            </div>
+
+            <div class="rh-card-title ef-titulo">Contacto</div>
+            <div class="rh-grid-2">
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-tel">Teléfono</label>
+                <input id="ef-tel" class="inline-input" type="tel" formControlName="telefono" maxlength="20">
+              </div>
+              <div class="inline-wrap">
+                <label class="slim-label" for="ef-cor">Correo</label>
+                <input id="ef-cor" class="inline-input" type="email" formControlName="correo" maxlength="150"
+                       [class.invalido]="form.controls.correo.touched && form.controls.correo.invalid">
+              </div>
+            </div>
+
+            @if (puedeDatosPersonales) {
+              <div class="rh-card-title ef-titulo">Datos personales</div>
+              <div class="rh-grid-2">
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-curp">CURP</label>
+                  <input id="ef-curp" class="inline-input ef-mayus" formControlName="curp" maxlength="18" autocomplete="off">
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-rfc">RFC</label>
+                  <input id="ef-rfc" class="inline-input ef-mayus" formControlName="rfc" maxlength="13" autocomplete="off">
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-nss">NSS</label>
+                  <input id="ef-nss" class="inline-input" formControlName="nss" maxlength="11" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-nac">Fecha de nacimiento</label>
+                  <input id="ef-nac" class="inline-input" type="date" formControlName="fechaNacimiento">
+                </div>
+              </div>
+            }
+
+            <div class="rh-card-title ef-titulo">Cuenta ligada</div>
+            <div class="inline-wrap">
+              <label class="slim-label" for="ef-usr">Usuario de la empresa</label>
+              <select id="ef-usr" class="inline-input" formControlName="idUsuario">
+                <option [ngValue]="0">Sin cuenta</option>
+                @for (u of opcionesUsuario(); track u.id) { <option [ngValue]="u.id">{{ u.nombre }}</option> }
+              </select>
+              <span class="inline-ayuda">Opcional. Con una cuenta ligada podrá entrar a "Mi asistencia". Un usuario se liga a un solo empleado.</span>
+            </div>
+            <button type="submit" hidden></button>
+          </form>
+        </mat-tab>
+
+        <!-- ── Adscripción ── -->
+        <mat-tab label="Adscripción">
+          <div class="ef-tab">
+            <form [formGroup]="form" (ngSubmit)="guardar()">
+              <div class="rh-grid-2">
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-sp">Sucursal principal</label>
+                  <select id="ef-sp" class="inline-input" formControlName="idSucursalPrincipal">
+                    @for (s of opcionesSucursal(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+                  </select>
+                  @if (cambiaPrincipal()) {
+                    <span class="inline-ayuda error">Cambiar la sucursal principal puede cambiar su horario y sus festivos.</span>
+                  } @else {
+                    <span class="inline-ayuda">Donde pertenece: de ahí hereda horario y festivos.</span>
+                  }
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-so">Sucursal operativa</label>
+                  <select id="ef-so" class="inline-input" formControlName="idSucursalOperativa">
+                    @for (s of opcionesSucursal(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}</option> }
+                  </select>
+                  <span class="inline-ayuda">Donde trabaja hoy. Cubrir a alguien no cambia la principal.</span>
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-pue">Puesto</label>
+                  <div class="ef-con-boton">
+                    <select id="ef-pue" class="inline-input" formControlName="idPuesto">
+                      <option [ngValue]="0">Sin puesto</option>
+                      @for (p of opcionesPuesto(); track p.id) { <option [ngValue]="p.id">{{ p.nombre }}</option> }
+                    </select>
+                    @if (puedeCrearPuesto) {
+                      <button mat-icon-button type="button" matTooltip="Nuevo puesto" (click)="nuevoCatalogo('puestos')"><mat-icon>add</mat-icon></button>
+                    }
+                  </div>
+                </div>
+                <div class="inline-wrap">
+                  <label class="slim-label" for="ef-dep">Departamento</label>
+                  <div class="ef-con-boton">
+                    <select id="ef-dep" class="inline-input" formControlName="idDepartamento">
+                      <option [ngValue]="0">Sin departamento</option>
+                      @for (d of opcionesDepartamento(); track d.id) { <option [ngValue]="d.id">{{ d.nombre }}</option> }
+                    </select>
+                    @if (puedeCrearDepartamento) {
+                      <button mat-icon-button type="button" matTooltip="Nuevo departamento" (click)="nuevoCatalogo('departamentos')"><mat-icon>add</mat-icon></button>
+                    }
+                  </div>
+                </div>
+              </div>
+              <button type="submit" hidden></button>
+            </form>
+
+            <!-- Periodo laboral -->
+            <div class="rh-seccion">
+              <div class="rh-card-title">Periodos laborales</div>
+              <ul class="ef-periodos">
+                @for (p of e.periodos; track p.idPeriodo) {
+                  <li>
+                    <span>Ingreso {{ p.fechaIngreso | fechaNegocio }}</span>
+                    @if (p.fechaBaja) {
+                      <span>· Baja {{ p.fechaBaja | fechaNegocio }}</span><span class="rh-sub">{{ p.motivoBaja }}</span>
+                    } @else {
+                      <span class="rh-chip ok">Vigente</span>
+                    }
+                  </li>
+                }
+              </ul>
+
+              @if (puedeBaja && e.estado === 'ACTIVO') {
+                <form class="ef-accion" [formGroup]="formBaja" (ngSubmit)="darBaja()">
+                  <div class="inline-wrap">
+                    <label class="slim-label" for="ef-fb">Fecha de baja</label>
+                    <input id="ef-fb" type="date" class="inline-input" formControlName="fechaBaja" [max]="e.hoy">
+                  </div>
+                  <div class="inline-wrap ef-ancho">
+                    <label class="slim-label" for="ef-mb">Motivo</label>
+                    <input id="ef-mb" class="inline-input" formControlName="motivoBaja" maxlength="250" placeholder="Renuncia voluntaria"
+                           [class.invalido]="formBaja.controls.motivoBaja.touched && formBaja.controls.motivoBaja.invalid">
+                  </div>
+                  <button mat-stroked-button type="submit"><mat-icon>person_off</mat-icon> Dar de baja</button>
+                </form>
+              }
+              @if (puedeBaja && e.estado === 'BAJA') {
+                <form class="ef-accion" [formGroup]="formReingreso" (ngSubmit)="reingresar()">
+                  <div class="inline-wrap">
+                    <label class="slim-label" for="ef-fr">Fecha de reingreso</label>
+                    <input id="ef-fr" type="date" class="inline-input" formControlName="fechaIngreso">
+                  </div>
+                  <button mat-stroked-button type="submit"><mat-icon>person_add</mat-icon> Reingresar</button>
+                  <span class="inline-ayuda">Conserva su número, sus datos y sus periodos anteriores.</span>
+                </form>
+              }
+            </div>
+
+            <!-- Precio por hora -->
+            @if (puedePrecio) {
+              <div class="rh-seccion">
+                <div class="rh-card-title">Precio por hora</div>
+                @if (precios(); as pr) {
+                  <p class="ef-vigente">
+                    @if (pr.vigente) { Hoy: <strong>${{ pr.vigente.precioHora.toFixed(2) }}</strong> (desde {{ pr.vigente.aPartirDe | fechaNegocio }}) }
+                    @else { Sin precio vigente hoy. }
+                  </p>
+                  <form class="ef-accion" [formGroup]="formPrecio" (ngSubmit)="guardarPrecio()">
+                    <div class="inline-wrap">
+                      <label class="slim-label" for="ef-ph">Precio por hora</label>
+                      <input id="ef-ph" class="inline-input" type="number" min="0.01" step="0.01" formControlName="precioHora"
+                             [class.invalido]="formPrecio.controls.precioHora.touched && formPrecio.controls.precioHora.invalid">
+                    </div>
+                    <div class="inline-wrap">
+                      <label class="slim-label" for="ef-pa">A partir de</label>
+                      <input id="ef-pa" class="inline-input" type="date" formControlName="aPartirDe">
+                    </div>
+                    <button mat-stroked-button type="submit"><mat-icon>payments</mat-icon> Guardar precio</button>
+                  </form>
+                  @if (pr.historial.length) {
+                    <table class="ef-historial">
+                      <thead><tr><th>A partir de</th><th>Precio</th><th>Capturó</th></tr></thead>
+                      <tbody>
+                        @for (h of pr.historial; track h.idPrecio) {
+                          <tr>
+                            <td>{{ h.aPartirDe | fechaNegocio }}</td>
+                            <td>${{ h.precioHora.toFixed(2) }}</td>
+                            <td>{{ h.capturo || 'Sistema' }} <span class="rh-sub">{{ h.fechaCaptura | fechaSucursal: pr.zonaHoraria }}</span></td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                }
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- ── Pestañas de otros análisis (005, 006, 008…) ── -->
+        @for (x of extras(); track x.p.etiqueta) {
+          <mat-tab [label]="x.p.etiqueta">
+            <div class="ef-tab">
+              <ng-container *ngComponentOutlet="x.componente; inputs: { idEmpleado: e.idEmpleado }" />
+            </div>
+          </mat-tab>
+        }
+      </mat-tab-group>
+    }
+  </div>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (puedeEditar && emp()) { <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Guardar</button> }
+  </div>
+</div>

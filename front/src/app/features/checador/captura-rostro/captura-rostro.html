@@ -1,0 +1,38 @@
+<div class="cr" [class.grande]="grande()">
+  <div class="cr-marco" [class.alineado]="guia().estado === 'alineado' || grabando()">
+    <video #video class="cr-video" autoplay muted playsinline></video>
+
+    @if (listo()) {
+      <div class="cr-ovalo" [class.ok]="guia().estado === 'alineado' || grabando()"
+           [style.left.%]="ovalo().x" [style.top.%]="ovalo().y" [style.width.%]="ovalo().ancho" [style.height.%]="ovalo().alto"></div>
+    }
+
+    @if (grabando() && instruccion()) {
+      <div class="cr-reto">
+        <div class="cr-reto-texto">{{ instruccion() }}</div>
+        <div class="cr-giros">
+          @for (g of giros(); track $index) {
+            <span class="cr-giro" [class.hecho]="g.hecho">
+              <mat-icon>{{ g.hecho ? 'check_circle' : (g.lado === 'IZQ' ? 'arrow_back' : 'arrow_forward') }}</mat-icon>
+            </span>
+          }
+        </div>
+      </div>
+      @if (lado(); as l) {
+        <mat-icon class="cr-flecha" [class.izq]="l === 'IZQ'" [class.der]="l === 'DER'">{{ l === 'IZQ' ? 'keyboard_double_arrow_left' : 'keyboard_double_arrow_right' }}</mat-icon>
+      }
+    }
+
+    @if (cargando()) {
+      <div class="cr-capa"><mat-icon class="cr-gira">progress_activity</mat-icon><span>Preparando la cámara…</span></div>
+    } @else if (error()) {
+      <div class="cr-capa error"><mat-icon>videocam_off</mat-icon><span>{{ error() }}</span></div>
+    } @else if (pausado()) {
+      <div class="cr-capa suave"><mat-icon class="cr-gira">progress_activity</mat-icon></div>
+    }
+  </div>
+
+  @if (listo() && !grabando() && !pausado()) {
+    <div class="cr-guia" [class.ok]="guia().estado === 'alineado'">{{ aviso() || guia().texto }}</div>
+  }
+</div>

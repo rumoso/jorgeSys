@@ -1,0 +1,22 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>Rechazar marcaje</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+  <div class="rh-dialog-body">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    <p class="rh-sub">{{ data.marcaje.empleado }} ({{ data.marcaje.numeroEmpleado }}) · {{ data.marcaje.sucursal }}. El marcaje no se borra: queda anulado y visible, con tu nombre y el motivo.</p>
+    <div class="inline-wrap">
+      <label class="slim-label" for="rm-motivo">Motivo</label>
+      <textarea id="rm-motivo" class="inline-input" rows="3" maxlength="250" [formControl]="motivo" style="height:auto;padding:8px 10px"
+                [class.invalido]="motivo.touched && motivo.invalid" placeholder="No era la persona del número escrito"></textarea>
+    </div>
+  </div>
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (!hecho()) { <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Rechazar</button> }
+  </div>
+</div>

@@ -1,0 +1,21 @@
+.rh-dialog-head h2 { display: flex; flex-direction: column; min-width: 0; }
+.rh-dialog-head h2 .rh-sub { font-weight: 400; }
+.rh-banner { margin-bottom: 0; }
+.ap-plantilla { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 8px; background: var(--rh-surface-2);
+  border: 1px solid var(--rh-border); }
+.ap-dias { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.ap-grupo { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid var(--rh-border); border-radius: 8px; }
+.ap-propio { border-color: var(--rh-warn); }
+.ap-titulo { font-weight: 600; }
+.ap-lista { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px;
+  li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; font-size: 13.5px; } }
+.ap-tenue { color: var(--rh-text-2); font-size: 12px; }
+.ap-detalle { font-size: 12.5px; color: var(--rh-text-2); summary { cursor: pointer; color: var(--rh-primary); } }
+.ap-resultado { display: flex; flex-direction: column; gap: 8px; }
+.ap-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px;
+  .inline-wrap { width: 170px; }
+  .ap-ancho { flex: 1 1 220px; width: auto; } }
+
+@media (max-width: 768px) {
+  .ap-form .inline-wrap { width: auto; flex: 1 1 140px; }
+}

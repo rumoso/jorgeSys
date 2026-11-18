@@ -1,0 +1,38 @@
+<div class="ce">
+  @if (cargando() || trabajando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  @for (v of valores(); track v.idEmpresa) {
+    <div class="ce-fila">
+      <div class="ce-empresa">
+        <a class="pn-link" [routerLink]="['/panel/empresas', v.idEmpresa]">{{ v.empresa }}</a>
+        @if (v.estado !== 'ACTIVA') { <span class="rh-sub">{{ v.estado }}</span> }
+      </div>
+      <app-campo-dinamico [def]="constante()" [idCampo]="'ce-' + constante().clave + '-' + v.idEmpresa"
+                          [valor]="valor(v)" (valorChange)="cambiar(v, $event)" />
+      <div class="pn-botones">
+        @if (cambiado(v)) {
+          <button mat-flat-button (click)="guardar(v)" [disabled]="trabajando() || !!errorDe(valor(v))">Guardar</button>
+        }
+        <button mat-icon-button matTooltip="Quitar (usa el global)" aria-label="Quitar el valor propio" (click)="quitar(v)" [disabled]="trabajando()">
+          <mat-icon>public</mat-icon>
+        </button>
+      </div>
+    </div>
+  } @empty {
+    @if (!cargando()) { <div class="rh-sub ce-vacio">Todas las empresas usan el valor global.</div> }
+  }
+
+  <div class="ce-fila ce-nueva">
+    <div class="inline-wrap ce-empresa">
+      <label class="slim-label" [for]="'ce-nueva-' + constante().clave">Fijar a otra empresa</label>
+      <select class="inline-input" [id]="'ce-nueva-' + constante().clave" [formControl]="nuevaEmpresa">
+        <option [ngValue]="0">Escoge la empresa…</option>
+        @for (e of disponibles(); track e.idEmpresa) { <option [ngValue]="e.idEmpresa">{{ e.nombreComercial }}</option> }
+      </select>
+    </div>
+    <app-campo-dinamico [def]="constante()" [idCampo]="'ce-nv-' + constante().clave" [(valor)]="nuevoValor" />
+    <div class="pn-botones">
+      <button mat-stroked-button (click)="fijarNueva()" [disabled]="trabajando() || !nuevaEmpresa.value || !!errorDe(nuevoValor())">Fijar</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+:host { display: block; }
+.cr { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.cr-marco { position: relative; width: 100%; max-width: 480px; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden;
+  background: var(--rh-side); border: 3px solid var(--rh-border); transition: border-color .2s;
+  &.alineado { border-color: var(--rh-ok); } }
+.cr.grande .cr-marco { max-width: min(92vw, 820px); max-height: 62dvh; }
+.cr-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+.cr-ovalo { position: absolute; transform: translate(-50%, -50%); border: 3px dashed var(--rh-side-text); border-radius: 50%;
+  transition: all .15s ease-out; pointer-events: none; opacity: .85;
+  &.ok { border-style: solid; border-color: var(--rh-ok); } }
+.cr-reto { position: absolute; left: 0; right: 0; top: 0; padding: 10px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: color-mix(in srgb, var(--rh-side) 78%, transparent); color: var(--rh-side-text); }
+.cr-reto-texto { font-size: 18px; font-weight: 600; text-align: center; }
+.cr.grande .cr-reto-texto { font-size: clamp(20px, 3.4vw, 30px); }
+.cr-giros { display: flex; gap: 8px; }
+.cr-giro mat-icon { font-size: 26px; width: 26px; height: 26px; color: var(--rh-side-muted); }
+.cr-giro.hecho mat-icon { color: var(--rh-ok); }
+.cr-flecha { position: absolute; top: 50%; transform: translateY(-50%); font-size: 72px; width: 72px; height: 72px; color: var(--rh-side-text);
+  opacity: .9; animation: cr-latir 0.8s ease-in-out infinite alternate;
+  &.izq { left: 8px; } &.der { right: 8px; } }
+.cr-capa { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  color: var(--rh-side-text); background: color-mix(in srgb, var(--rh-side) 85%, transparent); text-align: center; padding: 16px; font-size: 15px;
+  mat-icon { font-size: 40px; width: 40px; height: 40px; }
+  &.suave { background: color-mix(in srgb, var(--rh-side) 35%, transparent); }
+  &.error mat-icon { color: var(--rh-bad); } }
+.cr-gira { animation: cr-girar 1s linear infinite; }
+.cr-guia { font-size: 15px; font-weight: 500; color: var(--rh-text-2); text-align: center; min-height: 22px;
+  &.ok { color: var(--rh-ok); } }
+.cr.grande .cr-guia { font-size: clamp(18px, 3vw, 26px); }
+@keyframes cr-girar { to { transform: rotate(360deg); } }
+@keyframes cr-latir { from { opacity: .45; } to { opacity: 1; } }

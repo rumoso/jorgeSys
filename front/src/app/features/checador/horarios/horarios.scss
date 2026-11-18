@@ -1,0 +1,18 @@
+.hr-sucursal { width: 260px !important; }
+.hr-tab { display: flex; flex-direction: column; gap: 10px; padding: 14px 2px 6px; }
+.rh-banner { margin-bottom: 0; }
+.rh-filtros { margin-bottom: 0; }
+.hr-ayuda { margin: 0; font-size: 13px; color: var(--rh-text-2); }
+.hr-botones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.hr-info { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13.5px; }
+.hr-mini { font-size: 13px; width: 13px; height: 13px; }
+.hr-todos { font-size: 13px; }
+.hr-sel { width: 36px; input { width: 17px; height: 17px; accent-color: var(--rh-primary); } }
+.hr-sel-card { width: 17px; height: 17px; margin-right: 6px; vertical-align: -3px; accent-color: var(--rh-primary); }
+.hr-chips { display: inline-flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.hr-aviso { color: var(--rh-warn); font-size: 16px; width: 16px; height: 16px; vertical-align: -3px; }
+
+@media (max-width: 768px) {
+  .hr-sucursal { width: auto !important; flex: 1 1 100% !important; }
+  .hr-botones button { flex: 1 1 auto; }
+}

@@ -1,0 +1,122 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ idUsuario() ? 'Acceso de ' + (data.usuario?.nombre || form.getRawValue().correo) : 'Dar acceso' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    @if (!puedeGuardar()) {
+      <div class="rh-banner info"><mat-icon>visibility</mat-icon>Solo lectura: no tienes el permiso para {{ idUsuario() ? 'editar usuarios' : 'dar acceso' }}.</div>
+    }
+
+    <div class="inline-wrap">
+      <label class="slim-label" for="u-correo">Correo</label>
+      <input id="u-correo" class="inline-input" type="email" inputmode="email" formControlName="correo" placeholder="nombre@empresa.com">
+      @if (!idUsuario()) { <span class="inline-ayuda">Si ya tiene cuenta (por ejemplo, en otra empresa), se usa esa misma.</span> }
+    </div>
+
+    @if (pideDatos()) {
+      <div class="rh-grid-2">
+        <div class="inline-wrap">
+          <label class="slim-label" for="u-nombre">Nombre</label>
+          <input id="u-nombre" class="inline-input" formControlName="nombre" maxlength="150">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label" for="u-pass">Contraseña inicial</label>
+          <input id="u-pass" class="inline-input" type="text" formControlName="password" autocomplete="new-password">
+          <span class="inline-ayuda">Mínimo {{ MIN }} caracteres. Entrégasela; la puede cambiar en Mi cuenta.</span>
+        </div>
+      </div>
+    }
+
+    <div>
+      <span class="slim-label">Roles</span>
+      <div class="rh-checks">
+        @for (r of data.roles; track r.idRol) {
+          <label class="rh-check">
+            <input type="checkbox" [checked]="rolMarcado(r.idRol)" [disabled]="!puedeGuardar()"
+                   (change)="alternarRol(r.idRol, $any($event.target).checked)">
+            {{ r.nombre }} @if (r.bProtegido) { <mat-icon class="rh-inline-icon">verified_user</mat-icon> }
+          </label>
+        }
+      </div>
+      <span class="inline-ayuda">Tiene la suma de los permisos de sus roles. Sin roles solo ve Hoy y Mi cuenta.
+        @if (esYo) { No puedes quitarte el último rol que te permite administrar usuarios. }
+        La empresa siempre conserva al menos un Administrador.</span>
+    </div>
+
+    <div>
+      <span class="slim-label">Sucursales</span>
+      <label class="rh-check"><input type="checkbox" formControlName="bTodasSucursales"> Todas las sucursales</label>
+      @if (!form.controls.bTodasSucursales.value) {
+        <div class="rh-checks" style="margin-top: 6px">
+          @for (s of data.sucursales; track s.idSucursal) {
+            <label class="rh-check">
+              <input type="checkbox" [checked]="marcada(s.idSucursal)" [disabled]="!puedeGuardar()"
+                     (change)="alternarSucursal(s.idSucursal, $any($event.target).checked)"> {{ s.nombre }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+    <button type="submit" hidden></button>
+
+    @if (idUsuario() && !esYo) {
+      <div class="rh-seccion">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div class="rh-card-title" style="margin: 0; flex: 1">Permisos directos</div>
+          @if (!verDirectos()) {
+            <button mat-stroked-button type="button" (click)="abrirDirectos()">
+              <mat-icon>tune</mat-icon> {{ data.usuario?.permisosDirectos ? 'Ver (' + data.usuario?.permisosDirectos + ')' : 'Ver' }}
+            </button>
+          }
+        </div>
+        <span class="inline-ayuda">Para darle algo a esta persona sin crear un rol solo para ella. Se suman a lo de sus roles.</span>
+        @if (verDirectos()) {
+          @if (bannerDirectos(); as b) {
+            <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok" style="margin-top: 8px"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+          }
+          @if (catalogo(); as c) {
+            <div style="margin-top: 8px">
+              <app-matriz-permisos [catalogo]="c.modulos" [marcados]="directos()" [heredados]="porRoles()" [otorgables]="c.otorgables"
+                                   [soloLectura]="!puedeDirectos" (cambio)="cambioDirectos($event)" />
+            </div>
+            @if (puedeDirectos) {
+              <div style="display: flex; justify-content: flex-end; margin-top: 8px">
+                <button mat-stroked-button type="button" (click)="guardarDirectos()" [disabled]="guardando()">Guardar permisos directos</button>
+              </div>
+            }
+          } @else { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+        }
+      </div>
+    }
+
+    @if (idUsuario() && puedeRestablecer) {
+      <div class="rh-seccion">
+        <div class="rh-card-title">Restablecer contraseña</div>
+        @if (bannerPass(); as b) {
+          <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+        }
+        <div class="rh-filtros" style="margin: 0">
+          <div class="inline-wrap" style="flex: 1 1 200px">
+            <label class="slim-label" for="u-nueva">Contraseña nueva</label>
+            <input id="u-nueva" class="inline-input" type="text" autocomplete="new-password" [formControl]="passwordNueva">
+          </div>
+          <button mat-stroked-button type="button" (click)="restablecer()" [disabled]="guardando()">Restablecer</button>
+        </div>
+        <span class="inline-ayuda">Solo si la cuenta entra únicamente a esta empresa; si entra a otras, la cambia la propia persona.</span>
+      </div>
+    }
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (puedeGuardar()) {
+      <button mat-flat-button (click)="guardar()" [disabled]="guardando()">{{ idUsuario() ? 'Guardar' : 'Dar acceso' }}</button>
+    }
+  </div>
+</div>

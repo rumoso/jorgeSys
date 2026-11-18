@@ -1,0 +1,16 @@
+:host { display: block; }
+.he { display: flex; flex-direction: column; gap: 10px; }
+.rh-banner { margin-bottom: 0; }
+.he-warn { background: var(--rh-warn-bg); color: var(--rh-warn); }
+.he-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13.5px; }
+.he-titulo { margin: 4px 0 0; }
+.he-guardar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px;
+  .inline-wrap { width: 160px; }
+  .he-ancho { flex: 1 1 200px; width: auto; } }
+.he-botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.he-hist { display: flex; align-items: center; justify-content: space-between; gap: 8px; .rh-card-title { margin: 0; } }
+
+@media (max-width: 768px) {
+  .he-guardar .inline-wrap { width: auto; flex: 1 1 140px; }
+  .he-botones { flex: 1 1 100%; button { flex: 1 1 auto; } }
+}

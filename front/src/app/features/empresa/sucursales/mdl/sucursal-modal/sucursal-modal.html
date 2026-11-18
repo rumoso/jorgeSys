@@ -1,0 +1,114 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ idSucursal() ? (puedeGuardar ? 'Editar sucursal' : 'Sucursal') : 'Nueva sucursal' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    <div class="inline-wrap">
+      <label class="slim-label" for="s-nombre">Nombre</label>
+      <input id="s-nombre" class="inline-input" formControlName="nombre" maxlength="100" placeholder="Matriz"
+             [class.invalido]="form.controls.nombre.touched && form.controls.nombre.invalid">
+      <span class="inline-ayuda">Único dentro de la empresa.</span>
+    </div>
+    <div class="inline-wrap">
+      <label class="slim-label" for="s-zona">Zona horaria</label>
+      <select id="s-zona" class="inline-input" formControlName="zonaHoraria">
+        @for (z of data.zonas; track z.zona) { <option [value]="z.zona">{{ z.nombre }}</option> }
+      </select>
+      @if (zonaCambiada()) {
+        <span class="inline-ayuda error">Cambiar la zona aplica de ahora en adelante: lo ya registrado conserva su fecha. Al guardar se te pedirá confirmarlo.</span>
+      } @else {
+        <span class="inline-ayuda">Define la fecha de los marcajes de esta sucursal.</span>
+      }
+    </div>
+    <div class="inline-wrap">
+      <label class="slim-label" for="s-dir">Dirección (opcional)</label>
+      <input id="s-dir" class="inline-input" formControlName="direccion" maxlength="250">
+    </div>
+
+    <div class="rh-seccion">
+      <div class="rh-card-title"><mat-icon class="rh-inline-icon">place</mat-icon> Ubicación (opcional)</div>
+      @if (puedeGuardar) {
+        <div class="inline-wrap">
+          <label class="slim-label" for="s-ubicacion">Coordenadas o enlace de Google Maps</label>
+          <input id="s-ubicacion" class="inline-input" formControlName="ubicacion" placeholder="19.4326, -99.1332"
+                 autocomplete="off" inputmode="text" [class.invalido]="!!errorUbicacion()">
+          @if (errorUbicacion(); as e) {
+            <span class="inline-ayuda error">{{ e }}</span>
+          } @else if (avisoUbicacion(); as a) {
+            <span class="inline-ayuda error">{{ a }}</span>
+          } @else if (!hayUbicacion()) {
+            <span class="inline-ayuda">Pega las coordenadas o un enlace de Google Maps que las traiga, o usa tu ubicación si estás en la sucursal.</span>
+          }
+        </div>
+      }
+      <div class="sm-botones">
+        @if (puedeGuardar) {
+          <button mat-stroked-button type="button" (click)="usarUbicacionActual()" [disabled]="localizando()">
+            <mat-icon>my_location</mat-icon> {{ localizando() ? 'Buscando…' : 'Usar mi ubicación actual' }}
+          </button>
+        }
+        <button mat-stroked-button type="button" (click)="buscarEnMapa()" [disabled]="!hayDireccion()">
+          <mat-icon>search</mat-icon> Buscar en Google Maps
+        </button>
+        @if (puedeGuardar && hayUbicacion()) {
+          <button mat-button type="button" (click)="quitarUbicacion()"><mat-icon>location_off</mat-icon> Quitar ubicación</button>
+        }
+      </div>
+      @if (urlMapa(); as url) {
+        <iframe class="sm-mapa" [src]="url" loading="lazy" referrerpolicy="no-referrer"
+                [title]="'Mapa de la ubicación de la sucursal ' + form.controls.nombre.value"></iframe>
+        <a class="sm-abrir" [href]="urlAbrirMapa()" target="_blank" rel="noopener noreferrer">
+          <mat-icon>open_in_new</mat-icon> Abrir en Google Maps
+        </a>
+      } @else if (!puedeGuardar) {
+        <span class="inline-ayuda">Esta sucursal no tiene ubicación.</span>
+      }
+    </div>
+
+    @if (excepciones().length) {
+      <div class="rh-seccion">
+        <div class="rh-card-title"><mat-icon class="rh-inline-icon">settings</mat-icon> Configuración</div>
+        <span class="inline-ayuda">Ajustes de la empresa que esta sucursal puede tener distintos. Si usa el de la empresa, toma el valor general.</span>
+        @for (e of excepciones(); track e.def.clave) {
+          <div class="sm-ajuste">
+            <div class="slim-label">{{ e.def.etiqueta }}</div>
+            <div class="sm-opciones">
+              <label class="rh-check">
+                <input type="radio" [name]="'exc-' + e.def.clave" [checked]="!e.propio" [disabled]="!puedeExcepciones"
+                       (change)="usarPropio(e, false)">
+                Usar el de la empresa ({{ texto(e.def, e.def.valorGeneral) }})
+              </label>
+              <label class="rh-check">
+                <input type="radio" [name]="'exc-' + e.def.clave" [checked]="e.propio" [disabled]="!puedeExcepciones"
+                       (change)="usarPropio(e, true)">
+                Valor propio
+              </label>
+            </div>
+            @if (e.propio) {
+              <app-campo-dinamico [def]="e.def" [idCampo]="'exc-v-' + e.def.clave" [soloLectura]="!puedeExcepciones"
+                                  [valor]="e.valor" (valorChange)="cambiarValor(e, $event)" />
+              @if (e.def.bAdvierteCalculos && puedeExcepciones) {
+                <span class="inline-ayuda">Un cambio aplica de ahora en adelante; lo ya calculado no se recalcula.</span>
+              }
+            }
+          </div>
+        }
+        @if (!puedeExcepciones) {
+          <span class="inline-ayuda">Para cambiarlos necesitas el permiso "Cambiar la configuración".</span>
+        }
+      </div>
+    }
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (mostrarGuardar()) { <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Guardar</button> }
+  </div>
+</div>

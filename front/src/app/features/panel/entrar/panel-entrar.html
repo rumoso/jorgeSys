@@ -1,0 +1,51 @@
+<div class="lg">
+  <aside class="lg-marca">
+    <div class="lg-logo"><mat-icon>shield_person</mat-icon> Truck Manager · Panel</div>
+    <h2>Panel del producto.</h2>
+    <p>Solo para el superadministrador: empresas, planes, cobro y constantes. Todo lo que se hace aquí queda en la bitácora.</p>
+  </aside>
+
+  <main class="lg-form-wrap">
+    @if (token2fa()) {
+      <form class="lg-form" (ngSubmit)="verificar()">
+        <div class="lg-logo lg-logo--movil"><mat-icon>shield_person</mat-icon> Truck Manager · Panel</div>
+        <h1>Código de verificación</h1>
+        <p class="lg-sub">Escribe el código de 6 dígitos de tu app de autenticación.</p>
+
+        <label class="lg-campo"><span>Código</span>
+          <input name="codigo" class="pe-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*"
+                 [(ngModel)]="codigo" placeholder="000000" autofocus>
+        </label>
+
+        @if (mensaje()) { <div class="lg-msg"><mat-icon>error_outline</mat-icon>{{ mensaje() }}</div> }
+        @if (entrando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+        <button mat-flat-button class="lg-btn" type="submit" [disabled]="entrando()">Verificar</button>
+        <button mat-button type="button" (click)="volver()"><mat-icon>arrow_back</mat-icon> Volver a empezar</button>
+      </form>
+    } @else {
+      <form class="lg-form" appEnterSecuencial [appEnterSecuencialFocoPrimero]="true" (appEnterSecuencialFin)="entrar()" (ngSubmit)="entrar()">
+        <div class="lg-logo lg-logo--movil"><mat-icon>shield_person</mat-icon> Truck Manager · Panel</div>
+        <h1>Entrar al panel</h1>
+        <p class="lg-sub">Con tu cuenta de superadministrador. No es la cuenta de una empresa.</p>
+
+        <label class="lg-campo"><span>Correo</span>
+          <input type="email" name="correo" autocomplete="username" inputmode="email" [(ngModel)]="correo">
+        </label>
+        <label class="lg-campo"><span>Contraseña</span>
+          <div class="lg-pass">
+            <input [type]="verPassword() ? 'text' : 'password'" name="password" autocomplete="current-password" [(ngModel)]="password">
+            <button type="button" class="lg-ojo" (click)="verPassword.set(!verPassword())" [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Ver contraseña'">
+              <mat-icon>{{ verPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+        </label>
+
+        @if (mensaje()) { <div class="lg-msg"><mat-icon>error_outline</mat-icon>{{ mensaje() }}</div> }
+        @if (entrando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+        <button mat-flat-button class="lg-btn" type="submit" [disabled]="entrando()">Continuar</button>
+      </form>
+    }
+  </main>
+</div>

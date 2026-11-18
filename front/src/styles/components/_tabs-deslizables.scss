@@ -1,0 +1,24 @@
+// Barra de pestañas que se arrastra (dedo o mouse), sin flechitas.
+// Solo aplica a los <mat-tab-group appTabsDeslizables> (clase que pone la
+// directiva `shared/directives/tabs-deslizables.directive.ts`).
+.tabs-deslizables > .mat-mdc-tab-header {
+  .mat-mdc-tab-label-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .mat-mdc-tab-labels { width: max-content; min-width: 100%; }
+  .mat-mdc-tab { flex: 0 0 auto; }
+}
+
+// Mientras se arrastra con el mouse: sin selección de texto y con la mano
+// de "agarrar".
+.tabs-deslizables.tabs-arrastrando,
+.tabs-deslizables.tabs-arrastrando * {
+  user-select: none !important;
+  cursor: grabbing !important;
+}

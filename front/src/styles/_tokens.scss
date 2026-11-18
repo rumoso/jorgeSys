@@ -1,0 +1,27 @@
+// Colores del producto (diseño aprobado 2026-11-10): índigo + estados.
+// `light-dark()` toma el valor según `color-scheme` (ThemeService).
+:root {
+  color-scheme: light dark;
+  --rh-primary: light-dark(#3C3489, #AFA9EC);
+  --rh-primary-strong: light-dark(#26215C, #CECBF6);
+  --rh-primary-bg: light-dark(#EEEDFE, #2A2560);
+  --rh-side: light-dark(#26215C, #15122F);
+  --rh-side-text: #CECBF6;
+  --rh-side-muted: #7F77DD;
+  --rh-side-active: light-dark(#3C3489, #2A2560);
+
+  --rh-bg: light-dark(#F5F5F9, #0F1015);
+  --rh-surface: light-dark(#FFFFFF, #181A22);
+  --rh-surface-2: light-dark(#F3F3F8, #20222C);
+  --rh-border: light-dark(#E4E4EC, #2C2F3A);
+  --rh-text: light-dark(#1E1E2A, #E9E9F0);
+  --rh-text-2: light-dark(#5F5E70, #A6A6B8);
+  --rh-text-3: light-dark(#9B9AAD, #6E6E80);
+
+  --rh-ok: light-dark(#085041, #5DCAA5);      --rh-ok-bg: light-dark(#E1F5EE, #0F3A30);
+  --rh-warn: light-dark(#633806, #EF9F27);    --rh-warn-bg: light-dark(#FAEEDA, #3D2A0C);
+  --rh-bad: light-dark(#791F1F, #F09595);     --rh-bad-bg: light-dark(#FCEBEB, #431818);
+  --rh-info: light-dark(#0C447C, #85B7EB);    --rh-info-bg: light-dark(#E6F1FB, #102C4A);
+}
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }

@@ -1,0 +1,16 @@
+// Piezas comunes de las pantallas del panel (009). Solo tokens --rh-*.
+.pn-busqueda { width: 260px !important; }
+.pn-link { color: var(--rh-primary); font-weight: 600; cursor: pointer; text-decoration: none;
+  &:hover { text-decoration: underline; } }
+.pn-excedido { color: var(--rh-bad); font-weight: 600; }
+.pn-num { text-align: right; font-variant-numeric: tabular-nums; }
+.pn-total { display: flex; justify-content: flex-end; gap: 12px; padding: 10px 4px 0; font-weight: 600; }
+.pn-clave { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: var(--rh-text-2); word-break: break-all; }
+.pn-botones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pc-titulo { margin-bottom: 6px; }
+.pn-json { margin: 0; padding: 8px 10px; max-height: 260px; overflow: auto; border-radius: 6px; background: var(--rh-surface-2);
+  color: var(--rh-text); font-size: 11.5px; white-space: pre-wrap; word-break: break-word; }
+
+@media (max-width: 768px) {
+  .pn-busqueda { width: auto !important; flex: 1 1 100% !important; }
+}

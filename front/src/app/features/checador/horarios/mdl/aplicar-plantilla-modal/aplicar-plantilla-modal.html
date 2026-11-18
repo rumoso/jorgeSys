@@ -1,0 +1,111 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>Aplicar la plantilla a empleados <span class="rh-sub">{{ data.sucursal }}</span></h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (cargando() || guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="rh-dialog-body">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+
+    @if (resultado(); as res) {
+      <div class="ap-resultado">
+        <div class="rh-card-title">Resultado</div>
+        <ul class="ap-lista">
+          @for (x of res.resultados; track x.idEmpleado) {
+            <li>
+              <span>{{ x.nombreCompleto }}</span>
+              <span class="ap-tenue">{{ x.generados }} día(s) regenerado(s)@if (x.conservados.length) { · {{ x.conservados.length }} a mano conservado(s) }</span>
+            </li>
+          }
+        </ul>
+        @if (conservados().length) {
+          <div class="rh-banner info"><mat-icon>edit_calendar</mat-icon>
+            <div>
+              <div>Estos días estaban cambiados a mano y se respetaron:</div>
+              @for (x of conservados(); track x.idEmpleado) {
+                @for (c of x.conservados; track c.fecha) {
+                  <div>{{ x.nombreCompleto }} · {{ c.fecha | fechaNegocio }}: {{ turno(c) }}@if (c.motivo) { ({{ c.motivo }}) }</div>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (vista(); as v) {
+      @if (!v.bDefinida) {
+        <div class="rh-banner bad"><mat-icon>error_outline</mat-icon>La plantilla de {{ v.sucursal }} está vacía: guárdala antes de aplicarla.</div>
+      } @else {
+        <div class="ap-plantilla">
+          <span class="slim-label">La plantilla guardada ({{ v.plantilla.totalHoras }} h por semana)</span>
+          <div class="ap-dias">
+            @for (d of v.plantilla.dias; track d.diaSemana) { <span><strong>{{ d.nombreDia.slice(0, 3) }}</strong> {{ turno(d) }}</span> }
+          </div>
+        </div>
+      }
+
+      @if (!v.empleados.length) {
+        <div class="rh-vacio"><mat-icon>groups</mat-icon>No hay empleados activos con {{ v.sucursal }} como sucursal principal.</div>
+      }
+
+      @for (g of grupos; track g.clave) {
+        @if (porGrupo()[g.clave].length) {
+          <section class="ap-grupo" [class.ap-propio]="g.clave === 'PROPIO'">
+            <label class="rh-check ap-titulo">
+              <input type="checkbox" [checked]="todos(g.clave)" [disabled]="!puedeAplicar || !v.bDefinida"
+                     (change)="alternarGrupo(g.clave, $any($event.target).checked)">
+              {{ g.titulo }} ({{ porGrupo()[g.clave].length }})
+            </label>
+            <span class="inline-ayuda">{{ g.ayuda }}</span>
+            <ul class="ap-lista">
+              @for (e of porGrupo()[g.clave]; track e.idEmpleado) {
+                <li>
+                  <label class="rh-check">
+                    <input type="checkbox" [checked]="escogido(e.idEmpleado)" [disabled]="!puedeAplicar || !v.bDefinida"
+                           (change)="alternar(e.idEmpleado, $any($event.target).checked)">
+                    {{ e.nombreCompleto }} <span class="ap-tenue">Núm. {{ e.numeroEmpleado }}</span>
+                  </label>
+                  @if (e.bSinHorario) {
+                    <span class="rh-chip warn">Sin horario</span>
+                  } @else if (g.clave !== 'IGUAL') {
+                    <details class="ap-detalle">
+                      <summary>Su horario</summary>
+                      @for (t of horarioDe(e); track $index) { <div>{{ t }}</div> }
+                    </details>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      }
+
+      @if (puedeAplicar && v.bDefinida && v.empleados.length) {
+        <form class="ap-form" [formGroup]="form" (ngSubmit)="aplicar()">
+          <div class="inline-wrap">
+            <label class="slim-label" for="ap-fecha">A partir de</label>
+            <input id="ap-fecha" class="inline-input" type="date" formControlName="aPartirDe" [min]="puedeRetroactivo ? null : v.hoy">
+          </div>
+          <div class="inline-wrap ap-ancho">
+            <label class="slim-label" for="ap-motivo">Motivo (opcional)</label>
+            <input id="ap-motivo" class="inline-input" formControlName="motivo" maxlength="250">
+          </div>
+          <button type="submit" hidden></button>
+        </form>
+        <span class="inline-ayuda">Los días anteriores a la fecha no cambian y los cambiados a mano se respetan.
+          @if (!puedeRetroactivo) { Una fecha pasada exige el permiso "Cambiar horarios y días de fechas pasadas". }</span>
+      }
+    }
+  </div>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (puedeAplicar && vista()?.bDefinida) {
+      <button mat-flat-button (click)="aplicar()" [disabled]="guardando() || !escogidos().size">Aplicar a {{ escogidos().size }}</button>
+    }
+  </div>
+</div>

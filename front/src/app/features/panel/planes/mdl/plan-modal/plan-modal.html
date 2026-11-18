@@ -1,0 +1,45 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>{{ idPlan() ? 'Editar plan' : 'Nuevo plan' }}</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <form class="rh-dialog-body" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+    }
+    <div class="inline-wrap">
+      <label class="slim-label" for="pl-nombre">Nombre</label>
+      <input id="pl-nombre" class="inline-input" formControlName="nombre" maxlength="100"
+             [class.invalido]="form.controls.nombre.touched && form.controls.nombre.invalid">
+    </div>
+    <div class="inline-wrap">
+      <label class="slim-label" for="pl-tipo">Tipo de cobro</label>
+      <select id="pl-tipo" class="inline-input" formControlName="tipoCobro">
+        @for (t of TIPOS; track t.valor) { <option [value]="t.valor">{{ t.texto }}</option> }
+      </select>
+      @if (idPlan() && (data.plan?.empresas ?? 0) > 0) {
+        <span class="inline-ayuda">Lo tienen {{ data.plan!.empresas }} empresa(s): el tipo de cobro no se puede cambiar.</span>
+      }
+    </div>
+    <div class="rh-grid-2">
+      @if (tipo() === 'LIMITE') {
+        <div class="inline-wrap">
+          <label class="slim-label" for="pl-limite">Límite de empleados</label>
+          <input id="pl-limite" class="inline-input" type="number" min="1" step="1" formControlName="limiteEmpleados" inputmode="numeric">
+        </div>
+      }
+      <div class="inline-wrap">
+        <label class="slim-label" for="pl-precio">{{ tipo() === 'LIMITE' ? 'Precio fijo al mes' : 'Precio por empleado' }}</label>
+        <input id="pl-precio" class="inline-input" type="number" min="0" step="0.01" formControlName="precio" inputmode="decimal">
+      </div>
+    </div>
+    <button type="submit" hidden></button>
+  </form>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    <button mat-flat-button (click)="guardar()" [disabled]="guardando()">Guardar</button>
+  </div>
+</div>

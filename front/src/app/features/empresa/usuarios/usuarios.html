@@ -1,0 +1,66 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Usuarios</h1>
+      <p>Quién entra a esta empresa. Una cuenta puede entrar a varias empresas con el mismo correo.</p>
+    </div>
+    @if (global.tienePermiso('usuarios_DarAcceso')) {
+      <button mat-flat-button (click)="abrir()"><mat-icon>person_add</mat-icon> Dar acceso</button>
+    }
+  </div>
+
+  <div class="rh-card">
+    <div class="rh-filtros">
+      <button mat-stroked-button (click)="buscar()"><mat-icon>refresh</mat-icon> Actualizar</button>
+      <span class="rh-espacio"></span>
+      <button mat-icon-button (click)="vl.alternar()" [matTooltip]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+        <mat-icon>{{ vl.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+      </button>
+    </div>
+
+    @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div [class.vista-cards]="vl.vista() === 'cards'">
+      <table mat-table appTablaTarjetas [dataSource]="lista()">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Usuario</th>
+          <td mat-cell *matCellDef="let u">
+            <div>{{ u.nombre }} @if (u.esYo) { <span class="rh-chip info">Tú</span> }<span class="rh-sub">{{ u.correo }}</span></div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="rol">
+          <th mat-header-cell *matHeaderCellDef>Roles</th>
+          <td mat-cell *matCellDef="let u">
+            <span [class.rh-chip]="u.esAdministrador" [class.ok]="u.esAdministrador">{{ u.rolesNombres || 'Sin rol' }}</span>
+            @if (u.permisosDirectos) { <span class="rh-chip info">+{{ u.permisosDirectos }} directos</span> }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="sucursales">
+          <th mat-header-cell *matHeaderCellDef>Sucursales</th>
+          <td mat-cell *matCellDef="let u">{{ u.bTodasSucursales ? 'Todas' : (u.sucursalesNombres || 'Ninguna activa') }}</td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let u" class="col-acciones">
+            @if (global.tienePermiso('usuarios_Editar')) {
+              <button mat-icon-button matTooltip="Editar acceso" (click)="abrir(u)"><mat-icon>edit</mat-icon></button>
+            } @else {
+              <button mat-icon-button matTooltip="Ver acceso" (click)="abrir(u)"><mat-icon>visibility</mat-icon></button>
+            }
+            @if (global.tienePermiso('usuarios_QuitarAcceso')) {
+              <span [matTooltip]="u.esYo ? 'No puedes quitarte a ti mismo el acceso' : 'Quitar acceso'">
+                <button mat-icon-button [disabled]="u.esYo" (click)="quitar(u)"><mat-icon>person_remove</mat-icon></button>
+              </span>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+      </table>
+    </div>
+
+    @if (!cargando() && !lista().length) {
+      <div class="rh-vacio"><mat-icon>manage_accounts</mat-icon>Nadie más tiene acceso todavía.</div>
+    }
+  </div>
+</div>

@@ -1,0 +1,5 @@
+.ea-password { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--rh-warn); background: var(--rh-warn-bg); }
+.ea-password-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ea-password-valor { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 18px; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 6px; background: var(--rh-surface); color: var(--rh-text); user-select: all; }

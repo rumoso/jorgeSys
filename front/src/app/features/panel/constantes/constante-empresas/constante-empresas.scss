@@ -1,0 +1,11 @@
+.ce { margin-top: 6px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--rh-border); background: var(--rh-surface); }
+.ce-fila { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 300px) auto; gap: 8px 16px; align-items: start;
+  padding: 8px 0; border-bottom: 1px solid var(--rh-border);
+  &:last-child { border-bottom: 0; } }
+.ce-empresa { min-width: 0; padding-top: 8px; }
+.ce-nueva .ce-empresa { padding-top: 0; }
+.ce-vacio { padding: 8px 0; }
+
+@media (max-width: 768px) {
+  .ce-fila { grid-template-columns: 1fr; }
+}

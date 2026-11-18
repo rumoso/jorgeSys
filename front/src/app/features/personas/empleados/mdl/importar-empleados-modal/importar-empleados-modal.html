@@ -1,0 +1,109 @@
+<div class="rh-dialog">
+  <div class="rh-dialog-head">
+    <h2>Alta masiva desde Excel</h2>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </div>
+  @if (trabajando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+  <div class="rh-dialog-body">
+    @if (banner(); as b) {
+      <div class="rh-banner" [class.ok]="b.tipo === 'ok'" [class.bad]="b.tipo === 'bad'" [class.info]="b.tipo === 'info'">
+        <mat-icon>{{ b.tipo === 'ok' ? 'check_circle' : b.tipo === 'bad' ? 'error_outline' : 'info' }}</mat-icon>{{ b.texto }}
+      </div>
+    }
+
+    @if (resultado(); as res) {
+      <!-- Resultado de la carga -->
+      <div class="im-totales">
+        <div class="im-total ok"><strong>{{ res.cargados }}</strong><span>cargados</span></div>
+        <div class="im-total bad"><strong>{{ res.rechazados.length }}</strong><span>rechazados</span></div>
+      </div>
+      @if (res.creados.puestos.length || res.creados.departamentos.length) {
+        <p class="inline-ayuda">
+          @if (res.creados.puestos.length) { Puestos creados: {{ res.creados.puestos.join(', ') }}. }
+          @if (res.creados.departamentos.length) { Departamentos creados: {{ res.creados.departamentos.join(', ') }}. }
+        </p>
+      }
+      @if (res.rechazados.length) {
+        <ul class="im-lista">
+          @for (x of res.rechazados; track x.renglon) {
+            <li class="im-renglon bad"><strong>Renglón {{ x.renglon }}</strong><span>{{ x.errores.join(' · ') }}</span></li>
+          }
+        </ul>
+      }
+      <div><button mat-stroked-button (click)="otraVez()"><mat-icon>upload_file</mat-icon> Cargar otro archivo</button></div>
+    } @else {
+      <!-- Paso 1: plantilla y archivo -->
+      <div class="im-pasos">
+        <div class="im-paso">
+          <span class="im-num">1</span>
+          <div>
+            <div>Descarga la plantilla y llénala: un empleado por renglón.</div>
+            <button mat-stroked-button (click)="descargarPlantilla()" [disabled]="trabajando()"><mat-icon>download</mat-icon> Plantilla</button>
+          </div>
+        </div>
+        <div class="im-paso">
+          <span class="im-num">2</span>
+          <div>
+            <div>Súbela. Antes de cargar verás qué renglones están bien y cuáles tienen error.</div>
+            <input #archivoExcel type="file" hidden
+                   accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="escoger($event)">
+            <button mat-stroked-button (click)="archivoExcel.click()" [disabled]="trabajando()"><mat-icon>upload_file</mat-icon> Escoger archivo</button>
+            @if (archivo(); as f) { <span class="rh-sub">{{ f.name }}</span> }
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 2: vista previa -->
+      @if (vista(); as v) {
+        <div class="im-totales">
+          <div class="im-total"><strong>{{ v.total }}</strong><span>renglones</span></div>
+          <div class="im-total ok"><strong>{{ v.correctos }}</strong><span>correctos</span></div>
+          <div class="im-total bad"><strong>{{ v.conError }}</strong><span>con error</span></div>
+        </div>
+
+        @if (hayCatalogos()) {
+          <div class="rh-banner info">
+            <mat-icon>add_circle_outline</mat-icon>
+            <div>
+              @if (v.seCrearan.puestos.length) { <div>Puestos que no existen: <strong>{{ v.seCrearan.puestos.join(', ') }}</strong></div> }
+              @if (v.seCrearan.departamentos.length) { <div>Departamentos que no existen: <strong>{{ v.seCrearan.departamentos.join(', ') }}</strong></div> }
+              <label class="rh-check im-check">
+                <input type="checkbox" [formControl]="crearCatalogos"> Crearlos al cargar
+              </label>
+              @if (!crearCatalogos.value) { <span class="inline-ayuda error">Sin crearlos, los renglones que los usan se rechazan.</span> }
+            </div>
+          </div>
+        }
+
+        <label class="rh-check"><input type="checkbox" [formControl]="soloError"> Solo los renglones con error</label>
+
+        <ul class="im-lista">
+          @for (x of renglones(); track x.renglon) {
+            <li class="im-renglon" [class.bad]="!x.ok">
+              <div class="im-cabeza">
+                <mat-icon class="rh-inline-icon">{{ x.ok ? 'check_circle' : 'error' }}</mat-icon>
+                <strong>Renglón {{ x.renglon }}</strong>
+                <span>{{ x.numeroEmpleado }} · {{ x.nombreCompleto || '(sin nombre)' }}</span>
+                @if (x.sucursal) { <span class="rh-sub">{{ x.sucursal }}@if (x.fechaIngreso) { · ingreso {{ x.fechaIngreso | fechaNegocio }} }</span> }
+              </div>
+              @for (m of x.errores; track m) { <div class="im-error">{{ m }}</div> }
+              @for (m of x.avisos; track m) { <div class="im-aviso">{{ m }}</div> }
+            </li>
+          } @empty {
+            <li class="rh-vacio">No hay renglones con error.</li>
+          }
+        </ul>
+      }
+    }
+  </div>
+
+  <div class="rh-dialog-foot">
+    <button mat-button (click)="cerrar()">Cerrar</button>
+    @if (vista(); as v) {
+      <button mat-flat-button (click)="confirmar()" [disabled]="trabajando() || !v.correctos">
+        Cargar {{ v.correctos }} correcto(s)
+      </button>
+    }
+  </div>
+</div>

@@ -1,0 +1,75 @@
+<div class="hs" [class.hs-revisando]="revisando()">
+  <div class="hs-encabezado" aria-hidden="true">
+    <span>Día</span><span>Tipo</span><span>Entrada</span><span>Salida</span><span>Comida (min)</span><span>Dentro</span><span>Horas</span>
+  </div>
+
+  @for (g of form.controls; track $index; let i = $index) {
+    <div class="hs-dia" [formGroup]="g" [class.hs-off]="!laborable(i)">
+      <div class="hs-nombre">{{ nombres[i] }}</div>
+
+      <div class="inline-wrap">
+        <label class="slim-label hs-movil" [for]="'hs-e-' + i">Tipo</label>
+        <select class="inline-input" [id]="'hs-e-' + i" formControlName="estado" [attr.aria-label]="nombres[i] + ': tipo de día'">
+          <option value="LABORABLE">Laborable</option>
+          <option value="DESCANSO">Descanso</option>
+          <option value="SIN_HORARIO">Sin horario</option>
+        </select>
+      </div>
+
+      @if (laborable(i)) {
+        <div class="inline-wrap">
+          <label class="slim-label hs-movil" [for]="'hs-en-' + i">Entrada</label>
+          <input class="inline-input" type="time" [id]="'hs-en-' + i" formControlName="entrada" [attr.aria-label]="nombres[i] + ': entrada'">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label hs-movil" [for]="'hs-sa-' + i">Salida</label>
+          <input class="inline-input" type="time" [id]="'hs-sa-' + i" formControlName="salida" [attr.aria-label]="nombres[i] + ': salida'">
+        </div>
+        <div class="inline-wrap">
+          <label class="slim-label hs-movil" [for]="'hs-co-' + i">Comida (min)</label>
+          <input class="inline-input" type="number" min="0" step="5" inputmode="numeric" [id]="'hs-co-' + i" formControlName="comidaMinutos"
+                 [attr.aria-label]="nombres[i] + ': minutos de comida'">
+        </div>
+        <label class="rh-check hs-dentro" matTooltip="Si la comida cuenta dentro de la jornada no se descuenta de las horas">
+          <input type="checkbox" formControlName="bComidaDentro" [attr.aria-label]="nombres[i] + ': la comida cuenta dentro de la jornada'">
+          <span class="hs-movil-inline">La comida cuenta dentro de la jornada</span>
+        </label>
+      } @else {
+        <div class="hs-vacio">{{ g.controls.estado.value === 'DESCANSO' ? 'Descanso' : 'Sin horario definido' }}</div>
+      }
+
+      <div class="hs-calculo">
+        @if (calculo(i); as c) {
+          @if (c.estado === 'LABORABLE') {
+            <strong>{{ horas(c.horas) }}</strong>
+            @if (c.tipoJornada) { <span class="rh-chip info">{{ jornada[c.tipoJornada] }}</span> }
+            @if (c.bCruzaMedianoche) { <span class="rh-chip" matTooltip="Sale al día siguiente: es un solo día, el de la entrada">+1 día</span> }
+          } @else { <span class="hs-tenue">—</span> }
+        }
+        @if (avisoDia(i); as a) {
+          <mat-icon class="hs-aviso" [matTooltip]="a.mensaje" [attr.aria-label]="a.mensaje">warning</mat-icon>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="hs-total">
+    <span>Total semanal: <strong>{{ horas(resumen()?.totalHoras) }}</strong>
+      @if (resumen()?.maxSemanal) { <span class="hs-tenue">(máximo de ley: {{ resumen()?.maxSemanal }} h)</span> }</span>
+    @if (revisando()) { <span class="hs-tenue">Calculando…</span> }
+  </div>
+
+  @if (errores().length) {
+    <div class="rh-banner bad"><mat-icon>error_outline</mat-icon>
+      <div>@for (e of errores(); track $index) { <div>{{ e }}</div> }</div>
+    </div>
+  }
+  @if (avisos().length) {
+    <div class="rh-banner hs-warn"><mat-icon>warning</mat-icon>
+      <div>
+        @for (a of avisos(); track $index) { <div>{{ a.mensaje }}</div> }
+        <div class="hs-nota">Es un aviso: se puede guardar (por ejemplo, horas extra programadas).</div>
+      </div>
+    </div>
+  }
+</div>

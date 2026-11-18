@@ -1,0 +1,102 @@
+<div class="k">
+  @switch (modo()) {
+    @case ('vincular') {
+      <div class="k-vincular">
+        <mat-icon class="k-logo">tablet_android</mat-icon>
+        <h1>Vincular este dispositivo</h1>
+        <p>En la computadora del administrador: <b>Checador → Dispositivos → Agregar dispositivo</b>. Escanea el QR que aparece o escribe el código.</p>
+
+        @if (mensajeVincular(); as m) {
+          <div class="k-msj" [class.ok]="m.ok"><mat-icon>{{ m.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ m.texto }}</div>
+        }
+
+        <video #videoQr class="k-qr" [hidden]="!escaneando()" autoplay muted playsinline></video>
+        @if (escaneando()) {
+          <p class="k-sub">Apunta la cámara al QR de la pantalla del administrador…</p>
+          <button mat-stroked-button (click)="detenerQr()">Escribir el código</button>
+        } @else {
+          <button mat-flat-button class="k-btn" (click)="escanearQr()"><mat-icon>qr_code_scanner</mat-icon> Escanear QR</button>
+          <div class="k-o">o</div>
+          <div class="k-codigo">
+            <input class="k-input" [formControl]="codigo" maxlength="9" autocomplete="off" autocapitalize="characters"
+                   spellcheck="false" placeholder="CÓDIGO" aria-label="Código de vinculación" (keydown.enter)="vincular()">
+            <button mat-flat-button class="k-btn" (click)="vincular()" [disabled]="vinculando()">Vincular</button>
+          </div>
+        }
+      </div>
+    }
+
+    @case ('checador') {
+      <header class="k-top">
+        <div class="k-donde">
+          <b>{{ info()?.sucursal }}</b>
+          <span>{{ info()?.empresa }} · {{ info()?.nombre }}</span>
+        </div>
+        <div class="k-hora">{{ ahora() | fechaSucursal: zona() : 'hora' }}</div>
+        <button mat-icon-button class="k-pc" (click)="alternarPantallaCompleta()" [attr.aria-label]="pantallaCompleta() ? 'Salir de pantalla completa' : 'Pantalla completa'">
+          <mat-icon>{{ pantallaCompleta() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+        </button>
+      </header>
+
+      @if (sinConexion()) {
+        <div class="k-banner bad"><mat-icon>wifi_off</mat-icon> Sin conexión: no se puede registrar en este momento.</div>
+      }
+
+      <main class="k-main">
+        @if (sinCamara(); as sc) {
+          <div class="k-sincamara">
+            <mat-icon>no_photography</mat-icon>
+            <h2>{{ sc === 'SIN_PERMISO' ? 'Falta el permiso de la cámara' : 'No se pudo abrir la cámara' }}</h2>
+            @if (sc === 'SIN_PERMISO') {
+              <ol>
+                <li>Toca el candado (o los tres puntos) junto a la dirección, o abre <b>Ajustes del sitio</b>.</li>
+                <li>Entra a <b>Permisos → Cámara</b> y escoge <b>Permitir</b>.</li>
+                <li>Si es la app instalada: Ajustes del equipo → Apps → Chrome → Permisos → Cámara → Permitir.</li>
+                <li>Regresa aquí y toca <b>Reintentar</b>.</li>
+              </ol>
+            } @else {
+              <p>{{ sc }}</p>
+            }
+            <button mat-flat-button class="k-btn" (click)="reintentarCamara()"><mat-icon>refresh</mat-icon> Reintentar</button>
+          </div>
+        } @else {
+          @for (k of [camaraKey()]; track k) {
+            <app-captura-rostro modo="CHECADOR" [grande]="true" [pedirReto]="pedirReto" [pausado]="pausado() || sinConexion()"
+                                (capturada)="alCapturar($event)" (camara)="camara($event)" (presencia)="presencia()" />
+          }
+          @if (ofrecerNumero() && !teclado()) {
+            <button mat-stroked-button class="k-numero" (click)="abrirTeclado()"><mat-icon>dialpad</mat-icon> Checar con mi número de empleado</button>
+          }
+        }
+      </main>
+
+      @if (aviso(); as a) {
+        <div class="k-aviso" [class]="'k-aviso ' + a.tipo" role="status" aria-live="assertive">
+          <mat-icon>{{ a.icono }}</mat-icon>
+          <div class="k-aviso-titulo">{{ a.titulo }}</div>
+          @if (a.detalle) { <div class="k-aviso-detalle">{{ a.detalle }}</div> }
+        </div>
+      }
+
+      @if (teclado(); as t) {
+        <div class="k-teclado" role="dialog" [attr.aria-label]="t.titulo">
+          <h2>{{ t.titulo }}</h2>
+          <input class="k-input" [formControl]="numero" maxlength="20" inputmode="numeric" autocomplete="off" aria-label="Número de empleado">
+          <div class="k-teclas">
+            @for (d of ['1','2','3','4','5','6','7','8','9','⌫','0']; track d) {
+              <button type="button" class="k-tecla" (click)="tecla(d)">{{ d }}</button>
+            }
+            <button type="button" class="k-tecla ok" (click)="enviarNumero()" [disabled]="enviandoNumero() || !numero.value">
+              <mat-icon>check</mat-icon>
+            </button>
+          </div>
+          <button mat-button (click)="cancelarTeclado()">Cancelar</button>
+        </div>
+      }
+    }
+
+    @default {
+      <div class="k-vincular"><mat-icon class="k-logo">fingerprint</mat-icon></div>
+    }
+  }
+</div>

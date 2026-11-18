@@ -1,0 +1,114 @@
+@if (soporte(); as s) {
+  <!-- 009: sesión de soporte. Siempre visible, fija y distinta del resto. -->
+  <div class="sh-soporte" role="status">
+    <mat-icon>support_agent</mat-icon>
+    <span class="sh-soporte-texto">Sesión de soporte en <b>{{ s.empresa }}</b></span>
+    <span class="sh-soporte-tiempo" [attr.aria-label]="'Quedan ' + restante()">{{ restante() }}</span>
+    <button type="button" class="sh-soporte-salir" (click)="salir()" [disabled]="saliendo()"><mat-icon>logout</mat-icon>Salir</button>
+  </div>
+}
+<mat-sidenav-container class="sh" autosize>
+  <mat-sidenav class="sh-side" [mode]="celular() ? 'over' : 'side'" [opened]="!celular() || abierto()" (closedStart)="abierto.set(false)"
+               [fixedInViewport]="celular()">
+    <div class="sh-brand">
+      <mat-icon>fingerprint</mat-icon><span>Truck Manager</span>
+      @if (celular()) { <button mat-icon-button class="sh-cerrar" (click)="abierto.set(false)" aria-label="Cerrar menú"><mat-icon>close</mat-icon></button> }
+    </div>
+    @if (celular()) {
+      @if (variasEmpresas()) {
+        <button type="button" class="sh-side-empresa sh-side-btn" [matMenuTriggerFor]="mEmpresa"><mat-icon>business</mat-icon><span>{{ empresa() }}</span><mat-icon>expand_more</mat-icon></button>
+      } @else {
+        <div class="sh-side-empresa"><mat-icon>business</mat-icon><span>{{ empresa() }}</span></div>
+      }
+      <button type="button" class="sh-side-empresa sh-side-btn" [matMenuTriggerFor]="mSucursal"><mat-icon>place</mat-icon><span>{{ sucursal() }}</span><mat-icon>expand_more</mat-icon></button>
+    }
+    <nav class="sh-nav">
+      @for (g of menu(); track g.modulo) {
+        @if (g.nombre) { <div class="sh-grupo">{{ g.nombre }}@if (g.bloqueado) { · pronto }</div> }
+        @for (i of g.items; track i.ruta) {
+          <a class="sh-item" [class.bloq]="i.bloqueado" [routerLink]="i.ruta" routerLinkActive="on">
+            <mat-icon>{{ i.bloqueado ? 'lock' : i.icono }}</mat-icon><span>{{ i.titulo }}</span>
+            @if (i.menu === 'por_revisar' && porRevisar() > 0) { <span class="sh-badge" [attr.aria-label]="porRevisar() + ' por revisar'">{{ porRevisar() }}</span> }
+          </a>
+        }
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="sh-main">
+    <header class="sh-top">
+      @if (celular()) {
+        <button mat-icon-button (click)="abierto.set(true)" aria-label="Abrir menú"><mat-icon>menu</mat-icon></button>
+        <span class="sh-top-marca"><mat-icon>fingerprint</mat-icon> Truck Manager</span>
+      } @else {
+        @if (variasEmpresas()) {
+          <button class="sh-chip" [matMenuTriggerFor]="mEmpresa" [disabled]="cambiando()"><mat-icon>business</mat-icon><span class="sh-chip-t">{{ empresa() }}</span><mat-icon>expand_more</mat-icon></button>
+        } @else {
+          <span class="sh-chip sh-chip--fijo"><mat-icon>business</mat-icon><span class="sh-chip-t">{{ empresa() }}</span></span>
+        }
+        <button class="sh-chip" [matMenuTriggerFor]="mSucursal"><mat-icon>place</mat-icon><span class="sh-chip-t">{{ sucursal() }}</span><mat-icon>expand_more</mat-icon></button>
+      }
+      <span class="sh-spacer"></span>
+      <button mat-icon-button matTooltip="Buscar" aria-label="Buscar"><mat-icon>search</mat-icon></button>
+      <button mat-icon-button matTooltip="Avisos" aria-label="Avisos"><mat-icon>notifications</mat-icon></button>
+      <button class="sh-avatar" [matMenuTriggerFor]="mUsuario" aria-label="Mi cuenta">{{ iniciales() }}</button>
+    </header>
+
+    <main class="sh-content">
+      <router-outlet />
+    </main>
+
+    @if (celular()) {
+      <nav class="sh-bottom" [style.grid-template-columns]="'repeat(' + (inferior().length + 1) + ', 1fr)'">
+        @for (i of inferior(); track i.ruta) {
+          <a [routerLink]="i.ruta" routerLinkActive="on"><mat-icon>{{ i.icono }}</mat-icon><span>{{ i.titulo }}</span></a>
+        }
+        <button type="button" (click)="abierto.set(true)"><mat-icon>menu</mat-icon><span>Menú</span>@if (porRevisar() > 0) { <span class="sh-badge sh-badge--inferior" [attr.aria-label]="porRevisar() + ' por revisar'">{{ porRevisar() }}</span> }</button>
+      </nav>
+    }
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<mat-menu #mEmpresa="matMenu">
+  @for (e of auth.empresas(); track e.idEmpresa) {
+    <button mat-menu-item (click)="cambiarEmpresa(e.idEmpresa)">
+      <mat-icon>{{ e.idEmpresa === auth.empresa()?.idEmpresa ? 'check' : 'business' }}</mat-icon>{{ e.nombre }}
+    </button>
+  }
+</mat-menu>
+<mat-menu #mSucursal="matMenu">
+  <button mat-menu-item (click)="auth.escogerSucursal(null)">
+    <mat-icon>{{ auth.sucursalActiva() === null ? 'check' : 'select_all' }}</mat-icon>{{ auth.sesion()?.todasSucursales ? 'Todas las sucursales' : 'Todas mis sucursales' }}
+  </button>
+  @for (s of auth.sucursales(); track s.idSucursal) {
+    <button mat-menu-item (click)="auth.escogerSucursal(s.idSucursal)">
+      <mat-icon>{{ auth.sucursalActiva() === s.idSucursal ? 'check' : 'place' }}</mat-icon>{{ s.nombre }}
+    </button>
+  }
+  @if (!auth.sucursales().length) { <button mat-menu-item disabled>No tienes sucursales activas</button> }
+</mat-menu>
+<mat-menu #mApariencia="matMenu" xPosition="before">
+  <div class="sh-menu-sub">Paleta</div>
+  @for (p of PALETAS; track p.clave) {
+    <button mat-menu-item (click)="theme.escogerPaleta(p.clave)">
+      <span class="sh-paleta" [style.background]="p.muestra.principal" [style.border-color]="p.muestra.lado"></span>
+      <span class="sh-menu-texto">{{ p.nombre }}</span>
+      @if (theme.paleta() === p.clave) { <mat-icon class="sh-check">check</mat-icon> }
+    </button>
+  }
+  <div class="sh-menu-sub">Modo</div>
+  @for (m of MODOS; track m.clave) {
+    <button mat-menu-item (click)="theme.aplicar(m.clave)">
+      <mat-icon>{{ m.icono }}</mat-icon><span class="sh-menu-texto">{{ m.nombre }}</span>
+      @if (theme.tema() === m.clave) { <mat-icon class="sh-check">check</mat-icon> }
+    </button>
+  }
+</mat-menu>
+<mat-menu #mUsuario="matMenu" xPosition="before">
+  <div class="sh-menu-user"><b>{{ nombreUsuario() }}</b>@if (auth.usuario(); as u) { <small>{{ u.correo }}</small> }</div>
+  @if (!soporte()) {
+    <a mat-menu-item routerLink="/app/cuenta"><mat-icon>person</mat-icon>Mi cuenta</a>
+    <button mat-menu-item [matMenuTriggerFor]="mApariencia"><mat-icon>palette</mat-icon>Apariencia</button>
+  }
+  <button mat-menu-item (click)="salir()"><mat-icon>logout</mat-icon>{{ soporte() ? 'Salir de la sesión de soporte' : 'Salir' }}</button>
+</mat-menu>

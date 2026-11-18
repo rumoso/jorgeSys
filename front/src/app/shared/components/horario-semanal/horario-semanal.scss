@@ -1,0 +1,32 @@
+:host { display: block; }
+.hs { display: flex; flex-direction: column; gap: 6px; }
+.hs-revisando .hs-calculo { opacity: .55; }
+.hs-encabezado, .hs-dia {
+  display: grid; align-items: center; gap: 8px;
+  grid-template-columns: 86px 126px 108px 108px 92px 56px minmax(120px, 1fr);
+}
+.hs-encabezado { font-size: 10.5px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; color: var(--rh-text-2); padding: 0 9px; }
+.hs-dia { padding: 6px 8px; border: 1px solid var(--rh-border); border-radius: 8px; background: var(--rh-surface); }
+.hs-off { background: var(--rh-surface-2); }
+.hs-nombre { font-weight: 600; font-size: 13.5px; }
+.hs-vacio { grid-column: 3 / span 4; color: var(--rh-text-2); font-size: 13px; }
+.hs-dentro { justify-content: center; }
+.hs-calculo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+.hs-aviso { color: var(--rh-warn); font-size: 18px; width: 18px; height: 18px; }
+.hs-tenue { color: var(--rh-text-2); font-size: 12px; }
+.hs-total { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; padding: 4px 8px; font-size: 13.5px; }
+.hs-movil, .hs-movil-inline { display: none; }
+.rh-banner { margin-bottom: 0; }
+.hs-warn { background: var(--rh-warn-bg); color: var(--rh-warn); }
+.hs-nota { margin-top: 4px; font-size: 12px; opacity: .85; }
+
+// Celular (y la ficha angosta): un día por tarjeta.
+@media (max-width: 860px) {
+  .hs-encabezado { display: none; }
+  .hs-dia { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); padding: 10px 12px; border-radius: 10px; }
+  .hs-nombre { grid-column: 1 / -1; font-size: 14.5px; border-bottom: 1px solid var(--rh-border); padding-bottom: 4px; }
+  .hs-vacio, .hs-dentro, .hs-calculo { grid-column: 1 / -1; }
+  .hs-dentro { justify-content: flex-start; }
+  .hs-movil { display: block; }
+  .hs-movil-inline { display: inline; }
+}

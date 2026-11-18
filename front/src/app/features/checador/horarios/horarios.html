@@ -1,0 +1,211 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Horarios</h1>
+      <p>La plantilla de cada sucursal, los días programados de sus empleados y quién tiene el horario por ajustar.</p>
+    </div>
+  </div>
+
+  <div class="rh-card">
+    <div class="rh-filtros">
+      <div class="inline-wrap hr-sucursal">
+        <label class="slim-label" for="hr-suc">Sucursal</label>
+        <select id="hr-suc" class="inline-input" [formControl]="idSucursal" (change)="cambiarSucursal()">
+          @for (s of sucursales(); track s.idSucursal) { <option [ngValue]="s.idSucursal">{{ s.nombre }}{{ s.bActivo ? '' : ' (inactiva)' }}</option> }
+        </select>
+      </div>
+    </div>
+
+    @if (!sucursales().length) {
+      <div class="rh-vacio"><mat-icon>storefront</mat-icon>No tienes sucursales asignadas.</div>
+    }
+
+    @if (sucursal(); as s) {
+      <mat-tab-group appTabsDeslizables mat-stretch-tabs="false" animationDuration="150ms">
+        <!-- ── Plantilla ── -->
+        <mat-tab label="Plantilla">
+          <div class="hr-tab">
+            @if (cargandoPlantilla() || guardando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+            @if (banner(); as b) {
+              <div class="rh-banner" [class.ok]="b.ok" [class.bad]="!b.ok"><mat-icon>{{ b.ok ? 'check_circle' : 'error_outline' }}</mat-icon>{{ b.texto }}</div>
+            }
+            <p class="hr-ayuda">El horario de referencia de {{ s.nombre }}. Un empleado nuevo la copia; cambiarla <strong>no cambia a nadie</strong>:
+              para eso está "Aplicar a empleados…".</p>
+            @if (!puedePlantilla) {
+              <div class="rh-banner info"><mat-icon>lock</mat-icon>Solo consulta: no tienes el permiso para cambiar plantillas.</div>
+            }
+            @if (plantilla(); as p) {
+              @if (!p.bDefinida) { <div class="rh-banner info"><mat-icon>info</mat-icon>Esta sucursal todavía no tiene plantilla.</div> }
+              <app-horario-semanal [horario]="p" [soloLectura]="!puedePlantilla" />
+            }
+            @if (puedePlantilla) {
+              <div class="hr-botones">
+                <button mat-stroked-button (click)="aplicar()" [disabled]="!plantilla()?.bDefinida"><mat-icon>group_add</mat-icon> Aplicar a empleados…</button>
+                <button mat-flat-button (click)="guardarPlantilla()" [disabled]="guardando() || !plantilla()"><mat-icon>save</mat-icon> Guardar plantilla</button>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- ── Día ── -->
+        <mat-tab label="Día">
+          <div class="hr-tab">
+            <form class="rh-filtros" [formGroup]="filtrosDia" (ngSubmit)="buscarDia()">
+              <div class="inline-wrap">
+                <label class="slim-label" for="hr-fecha">Fecha</label>
+                <input id="hr-fecha" class="inline-input" type="date" formControlName="fecha">
+              </div>
+              <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Buscar</button>
+              <span class="rh-espacio"></span>
+              @if (puedeCambiarDia && dias()?.empleados?.length) {
+                <button mat-flat-button type="button" (click)="cambiarVarios()" [disabled]="!escogidos().size">
+                  <mat-icon>edit_calendar</mat-icon> Cambiar un día ({{ escogidos().size }})
+                </button>
+              }
+              <button mat-icon-button type="button" (click)="vlDia.alternar()" [matTooltip]="vlDia.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+                <mat-icon>{{ vlDia.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+              </button>
+            </form>
+            @if (cargandoDia()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+            @if (dias(); as d) {
+              <div class="hr-info">
+                <span>{{ d.fecha | fechaNegocio }} en {{ d.sucursal }}: {{ d.empleados.length }} empleado(s)</span>
+                @if (d.semana.bCerrada) { <span class="rh-chip bad"><mat-icon class="hr-mini">lock</mat-icon>Semana cerrada (desde el {{ d.semana.cierre | fechaNegocio }})</span> }
+                @else if (d.bPasada) { <span class="rh-chip warn">Fecha pasada</span> }
+              </div>
+              @if (puedeCambiarDia && d.empleados.length) {
+                <label class="rh-check hr-todos"><input type="checkbox" [checked]="todosEscogidos()" (change)="escogerTodos($any($event.target).checked)"> Escoger a todos</label>
+              }
+
+              <div [class.vista-cards]="vlDia.vista() === 'cards'">
+                <table mat-table appTablaTarjetas [dataSource]="d.empleados">
+                  <ng-container matColumnDef="sel">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let e" class="hr-sel">
+                      <input type="checkbox" [checked]="escogidos().has(e.idEmpleado)" (change)="escoger(e.idEmpleado, $any($event.target).checked)"
+                             [attr.aria-label]="'Escoger a ' + e.nombreCompleto">
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef>Empleado</th>
+                    <td mat-cell *matCellDef="let e">
+                      <div>
+                        @if (puedeCambiarDia && vlDia.vista() === 'cards') {
+                          <input type="checkbox" class="hr-sel-card" [checked]="escogidos().has(e.idEmpleado)" (change)="escoger(e.idEmpleado, $any($event.target).checked)"
+                                 [attr.aria-label]="'Escoger a ' + e.nombreCompleto">
+                        }
+                        {{ e.nombreCompleto }} <span class="rh-sub">Núm. {{ e.numeroEmpleado }}</span>
+                      </div>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="horario">
+                    <th mat-header-cell *matHeaderCellDef>Horario</th>
+                    <td mat-cell *matCellDef="let e">{{ turno(e) }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="horas">
+                    <th mat-header-cell *matHeaderCellDef>Horas</th>
+                    <td mat-cell *matCellDef="let e">
+                      @if (e.estado === 'LABORABLE') { {{ horas(e.horas) }}@if (e.tipoJornada) { · {{ etiquetaJornada(e.tipoJornada) }} } } @else { — }
+                      @if (e.bExcede) { <mat-icon class="hr-aviso" [matTooltip]="'Pasa del máximo de ' + e.maximoDiario + ' h'">warning</mat-icon> }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="sucursal">
+                    <th mat-header-cell *matHeaderCellDef>Sucursal del día</th>
+                    <td mat-cell *matCellDef="let e">{{ e.sucursal }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="marcas">
+                    <th mat-header-cell *matHeaderCellDef>Marcas</th>
+                    <td mat-cell *matCellDef="let e">
+                      <span class="hr-chips">
+                        @if (e.estado === 'DESCANSO') { <span class="rh-chip">Descanso</span> }
+                        @if (e.estado === 'SIN_HORARIO') { <span class="rh-chip bad">Sin horario</span> }
+                        @if (e.bManual) { <span class="rh-chip warn" [matTooltip]="e.motivo || ''">A mano</span> }
+                        @if (e.idSucursalCobertura) {
+                          <span class="rh-chip info">{{ e.bCubre ? 'Viene a cubrir' : 'Cubre en ' + e.sucursalCobertura }} desde {{ e.horaCobertura }}</span>
+                        }
+                      </span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let e" class="col-acciones">
+                      <button mat-icon-button [matTooltip]="puedeCambiarDia ? 'Cambiar este día' : 'Ver el día'" (click)="cambiarUno(e)">
+                        <mat-icon>{{ puedeCambiarDia ? 'edit_calendar' : 'visibility' }}</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="columnasDia()"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasDia()"></tr>
+                </table>
+              </div>
+              @if (!d.empleados.length) {
+                <div class="rh-vacio"><mat-icon>event_busy</mat-icon>Nadie tiene día programado esa fecha en {{ d.sucursal }}.</div>
+              }
+            } @else if (!cargandoDia()) {
+              <div class="rh-vacio"><mat-icon>today</mat-icon>Escoge una fecha y pulsa Buscar.</div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- ── Por ajustar ── -->
+        <mat-tab label="Por ajustar">
+          <div class="hr-tab">
+            <div class="rh-filtros">
+              <label class="rh-check"><input type="checkbox" [formControl]="soloSucursal"> Solo {{ s.nombre }}</label>
+              <button mat-stroked-button (click)="buscarAjustar()"><mat-icon>search</mat-icon> Buscar</button>
+              <span class="rh-espacio"></span>
+              <button mat-icon-button (click)="vlAjustar.alternar()" [matTooltip]="vlAjustar.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+                <mat-icon>{{ vlAjustar.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+              </button>
+            </div>
+            @if (cargandoAjustar()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+            @if (porAjustar(); as lista) {
+              <div [class.vista-cards]="vlAjustar.vista() === 'cards'">
+                <table mat-table appTablaTarjetas [dataSource]="lista">
+                  <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef>Empleado</th>
+                    <td mat-cell *matCellDef="let e"><div>{{ e.nombreCompleto }} <span class="rh-sub">Núm. {{ e.numeroEmpleado }}</span></div></td>
+                  </ng-container>
+                  <ng-container matColumnDef="sucursal">
+                    <th mat-header-cell *matHeaderCellDef>Sucursal principal</th>
+                    <td mat-cell *matCellDef="let e">{{ e.sucursalPrincipal }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="falta">
+                    <th mat-header-cell *matHeaderCellDef>Qué falta</th>
+                    <td mat-cell *matCellDef="let e">
+                      @if (e.bSinHorario) { <span class="rh-chip bad">Sin horario semanal</span> }
+                      @if (e.diasSinHorario) { <span class="rh-chip warn">{{ e.diasSinHorario }} día(s) sin horario desde el {{ e.primerDiaSinHorario | fechaNegocio }}</span> }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let e" class="col-acciones">
+                      @if (puedeFicha) {
+                        <button mat-icon-button matTooltip="Abrir la ficha (pestaña Horario)" (click)="abrirFicha(e.idEmpleado)"><mat-icon>badge</mat-icon></button>
+                      }
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="columnasAjustar"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasAjustar"></tr>
+                </table>
+              </div>
+              @if (!lista.length) { <div class="rh-vacio"><mat-icon>task_alt</mat-icon>Nadie tiene el horario por ajustar.</div> }
+            } @else if (!cargandoAjustar()) {
+              <div class="rh-vacio"><mat-icon>rule</mat-icon>Pulsa Buscar para ver quién no tiene horario o tiene días sin horario por delante.</div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- ── Historial ── -->
+        <mat-tab label="Historial">
+          <ng-template matTabContent>
+            <div class="hr-tab">
+              <app-bitacora-horarios [idSucursal]="s.idSucursal" [version]="version()" />
+            </div>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+    }
+  </div>
+</div>

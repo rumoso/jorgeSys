@@ -1,0 +1,96 @@
+<div class="rh-page">
+  <div class="rh-page-head">
+    <div>
+      <h1>Empresas</h1>
+      <p>Todas las empresas del producto con su estado, su plan y su uso. Lo que se cambia aquí queda en la bitácora.</p>
+    </div>
+    <button mat-flat-button (click)="nueva()"><mat-icon>add_business</mat-icon> Nueva empresa</button>
+  </div>
+
+  <div class="rh-card">
+    <form class="rh-filtros" [formGroup]="filtros" (ngSubmit)="buscar()">
+      <div class="inline-wrap pn-busqueda">
+        <label class="slim-label" for="pe-q">Buscar</label>
+        <input id="pe-q" class="inline-input" formControlName="q" placeholder="Nombre, razón social o RFC" autocomplete="off">
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="pe-estado">Estado</label>
+        <select id="pe-estado" class="inline-input" formControlName="estado">
+          <option value="">Todos</option>
+          @for (e of ESTADOS; track e.valor) { <option [value]="e.valor">{{ e.texto }}</option> }
+        </select>
+      </div>
+      <div class="inline-wrap">
+        <label class="slim-label" for="pe-plan">Plan</label>
+        <select id="pe-plan" class="inline-input" formControlName="idPlan">
+          <option [ngValue]="0">Todos</option>
+          @for (p of planes(); track p.idPlan) { <option [ngValue]="p.idPlan">{{ p.nombre }}</option> }
+        </select>
+      </div>
+      <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Buscar</button>
+      <button mat-button type="button" (click)="limpiar()">Limpiar</button>
+      <span class="rh-espacio"></span>
+      <button mat-icon-button type="button" (click)="vl.alternar()" [matTooltip]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'"
+              [attr.aria-label]="vl.vista() === 'tabla' ? 'Ver como tarjetas' : 'Ver como tabla'">
+        <mat-icon>{{ vl.vista() === 'tabla' ? 'grid_view' : 'table_rows' }}</mat-icon>
+      </button>
+    </form>
+
+    @if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+
+    <div [class.vista-cards]="vl.vista() === 'cards'">
+      <table mat-table appTablaTarjetas [dataSource]="lista()">
+        <ng-container matColumnDef="empresa">
+          <th mat-header-cell *matHeaderCellDef>Empresa</th>
+          <td mat-cell *matCellDef="let e">
+            <a class="pn-link" (click)="abrir(e)">{{ e.nombreComercial }}</a>
+            @if (e.razonSocial || e.rfc) { <span class="rh-sub">{{ e.razonSocial }}{{ e.razonSocial && e.rfc ? ' · ' : '' }}{{ e.rfc }}</span> }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let e"><span class="rh-chip" [class]="claseEstado(e.estado)">{{ textoEstado(e.estado) }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="plan">
+          <th mat-header-cell *matHeaderCellDef>Plan</th>
+          <td mat-cell *matCellDef="let e">
+            {{ e.plan || 'Sin plan' }}
+            @if (e.precioEspecial !== null) { <span class="rh-sub">Precio especial</span> }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="empleados">
+          <th mat-header-cell *matHeaderCellDef>Empleados activos</th>
+          <td mat-cell *matCellDef="let e">
+            <span [class.pn-excedido]="e.limiteEmpleados !== null && e.empleadosActivos >= e.limiteEmpleados">
+              {{ e.empleadosActivos }}@if (e.limiteEmpleados !== null) { / {{ e.limiteEmpleados }} }
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="usuarios">
+          <th mat-header-cell *matHeaderCellDef>Usuarios</th>
+          <td mat-cell *matCellDef="let e">{{ e.usuarios }}</td>
+        </ng-container>
+        <ng-container matColumnDef="ultimoAcceso">
+          <th mat-header-cell *matHeaderCellDef>Último acceso</th>
+          <td mat-cell *matCellDef="let e">{{ e.ultimoAcceso ? (e.ultimoAcceso | fechaSucursal: panel.zona()) : '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="alta">
+          <th mat-header-cell *matHeaderCellDef>Alta</th>
+          <td mat-cell *matCellDef="let e">{{ e.fechaAlta | fechaSucursal: panel.zona() : 'fecha' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let e" class="col-acciones">
+            <button mat-icon-button matTooltip="Abrir la ficha" aria-label="Abrir la ficha" (click)="abrir(e)"><mat-icon>open_in_new</mat-icon></button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+      </table>
+    </div>
+
+    @if (!cargando() && !lista().length) {
+      <div class="rh-vacio"><mat-icon>domain</mat-icon>No hay empresas con ese filtro.</div>
+    }
+  </div>
+</div>

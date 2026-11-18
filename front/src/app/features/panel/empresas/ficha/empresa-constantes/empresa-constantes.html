@@ -1,0 +1,37 @@
+@if (cargando()) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+<p class="rh-sub">El valor de la empresa manda sobre el global. Quitarlo la regresa al global. Los cambios aplican de inmediato.</p>
+
+@for (g of grupos(); track g.grupo) {
+  <div class="ec-grupo">{{ g.grupo }}</div>
+  @for (c of g.constantes; track c.clave) {
+    <div class="ec-fila" [class.ec-propio]="c.bPropio">
+      <div class="ec-texto">
+        <label class="ec-etiqueta" [for]="'ec-' + c.clave">{{ c.etiqueta }}</label>
+        <span class="pn-clave">{{ c.clave }}</span>
+        @if (c.ayuda) { <p class="ec-ayuda">{{ c.ayuda }}</p> }
+        <div class="ec-marcas">
+          <span class="rh-sub">Global: <b>{{ texto(c, c.valor) }}</b></span>
+          @if (c.bPropio) { <span class="rh-chip warn">Valor propio: {{ texto(c, c.valorEmpresa) }}</span> }
+          @else { <span class="rh-chip info">Usa el global</span> }
+        </div>
+      </div>
+      <div class="ec-control">
+        <app-campo-dinamico [def]="c" [idCampo]="'ec-' + c.clave" [soloLectura]="soloLectura()"
+                            [valor]="valor(c)" (valorChange)="cambiar(c, $event)" />
+        @if (!soloLectura()) {
+          <div class="pn-botones">
+            @if (porFijar(c)) {
+              <button mat-flat-button (click)="fijar(c)" [disabled]="trabajando() === c.clave || !!error(c)">Fijar para la empresa</button>
+              <button mat-button (click)="deshacer(c)">Deshacer</button>
+            }
+            @if (c.bPropio && !porFijar(c)) {
+              <button mat-stroked-button (click)="quitar(c)" [disabled]="trabajando() === c.clave"><mat-icon>public</mat-icon> Usar el global</button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+} @empty {
+  @if (!cargando()) { <div class="rh-vacio"><mat-icon>tune</mat-icon>No hay constantes activas.</div> }
+}
